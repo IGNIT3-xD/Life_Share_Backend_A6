@@ -1,0 +1,24 @@
+enum Role {
+    SUPER_ADMIN
+    ADMIN
+    USER
+    DONOR
+    HOSPITAL
+}
+
+enum VerificationStatus {
+    PENDING
+    VERIFIED
+    REJECTED
+}
+
+enum Gender {
+    MALE
+    FEMALE
+    OTHERS
+}
+
+enum AuthProvider {
+    CREDENTIAL
+    GOOGLE
+}

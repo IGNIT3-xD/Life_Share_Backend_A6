@@ -1,0 +1,25 @@
+model User {
+    id       String  @id @default(uuid())
+    name     String
+    email    String  @unique
+    password String?
+    phone    String?
+    address  String?
+    gender   Gender
+
+    profile_pic           String?
+    profile_pic_public_id String?
+
+    role          Role         @default(USER)
+    auth_provider AuthProvider @default(CREDENTIAL)
+
+    email_verified Boolean @default(false)
+    is_active      Boolean @default(true)
+    is_blocked     Boolean @default(false)
+
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+
+    @@index([email], name: "idx_user_email")
+    @@map("users")
+}
