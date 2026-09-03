@@ -15,3 +15,10 @@ export interface ILoginUser {
 	email: string;
 	password: string;
 }
+
+export interface IUser {
+	userId: string;
+	email: string;
+	name: string;
+	role: Role;
+}

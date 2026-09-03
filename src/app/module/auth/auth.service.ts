@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt, { type SignOptions, type JwtPayload } from "jsonwebtoken";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
-import type { ILoginUser, IRegisterUser } from "./auth.interface";
+import type { ILoginUser, IRegisterUser, IUser } from "./auth.interface";
 
 const registerUserService = async (payload: IRegisterUser) => {
 	const { email, password, role } = payload;
@@ -95,7 +95,56 @@ const loginUserService = async (payload: ILoginUser) => {
 	return { accessToken, refreshToken };
 };
 
+const getMeService = async (user: IUser) => {
+	const userData = await prisma.user.findUnique({
+		where: {
+			email: user.email,
+			id: user.userId,
+		},
+		omit: { password: true }
+	});
+
+	if (!userData) {
+		throw new AppError(404, "User not found");
+	}
+
+	return userData
+}
+
+const refreshTokenService = async (rToken: string) => {
+	const verfyToken = jwt.verify(rToken, config.JWT_REFRESH) as JwtPayload
+
+	const { userId, name, email, role } = verfyToken
+
+	const user = await prisma.user.findUnique({
+		where: { id: userId, email },
+	});
+
+	if (!user || !user?.is_active || user.is_blocked) {
+		throw new Error("User is inactive / blocked or not found.");
+	}
+
+	const jwtPayload = {
+		userId,
+		name,
+		email,
+		role,
+	} as JwtPayload;
+
+	const accessToken = jwt.sign(jwtPayload, config.JWT_ACCESS, {
+		expiresIn: config.JWT_ACCESS_EXPIRES_IN,
+	} as SignOptions);
+
+	const refreshToken = jwt.sign(jwtPayload, config.JWT_REFRESH, {
+		expiresIn: config.JWT_REFRESH_EXPIRES_IN,
+	} as SignOptions);
+
+	return { accessToken, refreshToken };
+}
+
 export const AuthServices = {
 	registerUserService,
 	loginUserService,
+	getMeService,
+	refreshTokenService,
 };
