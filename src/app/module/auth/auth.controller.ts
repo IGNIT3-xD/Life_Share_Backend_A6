@@ -1,23 +1,71 @@
-import type { Request, Response } from 'express'
-import { AuthServices } from './auth.service'
+import type { Request, Response } from "express";
+import config from "../../config";
+import { catchAsync } from "../../utils/catchAsync";
+import sendResponse from "../../utils/sendResponse";
+import { AuthServices } from "./auth.service";
 
-const registerUserController = async (req: Request, res: Response) => {
-    try {
-        const result = await AuthServices.registerUserService(req.body)
+const registerUserController = catchAsync(
+	async (req: Request, res: Response) => {
+		const result = await AuthServices.registerUserService(req.body);
 
-        res.status(200).json({
-            success: true,
-            message: 'User registered successfully.',
-            data: result
-        })
-    } catch (error: any) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        })
-    }
-}
+		const { user, accessToken, refreshToken } = result;
+
+		res.cookie("accessToken", accessToken, {
+			httpOnly: true,
+			sameSite: "lax",
+			secure: config.NODE_ENV !== "development",
+			maxAge: 1000 * 60 * 60 * 24,
+		});
+		res.cookie("refreshToken", refreshToken, {
+			httpOnly: true,
+			sameSite: "lax",
+			secure: config.NODE_ENV !== "development",
+			maxAge: 1000 * 60 * 60 * 24 * 7,
+		});
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "User registered successfully.",
+			data: {
+				user,
+				accessToken,
+				refreshToken,
+			},
+		});
+	},
+);
+
+const loginUser = catchAsync(async (req: Request, res: Response) => {
+	const result = await AuthServices.loginUserService(req.body);
+
+	const { accessToken, refreshToken } = result;
+
+	res.cookie("accessToken", accessToken, {
+		httpOnly: true,
+		sameSite: "lax",
+		secure: config.NODE_ENV !== "development",
+		maxAge: 1000 * 60 * 60 * 24,
+	});
+	res.cookie("refreshToken", refreshToken, {
+		httpOnly: true,
+		sameSite: "lax",
+		secure: config.NODE_ENV !== "development",
+		maxAge: 1000 * 60 * 60 * 24 * 7,
+	});
+
+	sendResponse(res, {
+		statusCode: 200,
+		success: true,
+		message: "User login successfully.",
+		data: {
+			accessToken,
+			refreshToken,
+		},
+	});
+});
 
 export const AuthController = {
-    registerUserController
-}
+	registerUserController,
+	loginUser,
+};

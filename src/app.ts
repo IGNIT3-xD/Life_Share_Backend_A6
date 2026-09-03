@@ -1,6 +1,7 @@
 import cookieParser from "cookie-parser";
 import type { Application, Request, Response } from "express";
 import express from "express";
+import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 import authRouter from "./app/module/auth/auth.router";
 
 const app: Application = express();
@@ -16,6 +17,8 @@ app.get("/", (_req: Request, res: Response) => {
 	res.send("Hello World!");
 });
 
-app.use('/api/v1/auth', authRouter);
+app.use("/api/v1/auth", authRouter);
+
+app.use(globalErrorHandler);
 
 export default app;
