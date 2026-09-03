@@ -7,7 +7,6 @@ export interface IRegisterUser {
 	phone?: string;
 	address?: string;
 	gender: Gender;
-	profile_pic?: string;
 	role?: Role;
 }
 

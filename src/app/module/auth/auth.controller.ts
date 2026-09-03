@@ -7,7 +7,7 @@ import type { IUser } from "./auth.interface";
 
 const registerUserController = catchAsync(
 	async (req: Request, res: Response) => {
-		const result = await AuthServices.registerUserService(req.body);
+		const result = await AuthServices.registerUserService(req.body, req.file?.buffer);
 
 		const { user, accessToken, refreshToken } = result;
 

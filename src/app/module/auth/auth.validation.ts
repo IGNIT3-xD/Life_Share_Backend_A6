@@ -20,8 +20,7 @@ const registerUserValidation = z.object({
     phone: z.string().optional(),
     address: z.string().optional(),
     gender: z.enum([Gender.MALE, Gender.FEMALE, Gender.OTHERS], "Gender must be Male, Female or Others"),
-    role: z.enum([Role.USER, Role.DONOR, Role.HOSPITAL], "Role must be User, Donor or Hospital.").optional(),
-    profile_pic: z.string().optional()
+    role: z.enum([Role.USER, Role.DONOR, Role.HOSPITAL], "Role must be User, Donor or Hospital.").optional()
 })
 
 const loginUserValidation = z.object({

@@ -16,7 +16,10 @@
 		"enabled": true,
 		"rules": {
 			"preset": "recommended",
-			"complexity": "info"
+			"complexity": {
+				"noExcessiveLinesPerFunction": "off",
+				"useOptionalChain": "info"
+			}
 		}
 	},
 	"javascript": {

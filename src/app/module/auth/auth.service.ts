@@ -5,24 +5,51 @@ import jwt, { type SignOptions, type JwtPayload } from "jsonwebtoken";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import type { ILoginUser, IRegisterUser, IUser } from "./auth.interface";
+import cloudinary from "../../lib/cloudinary";
+import type { UploadApiResponse } from "cloudinary";
 
-const registerUserService = async (payload: IRegisterUser) => {
+const registerUserService = async (payload: IRegisterUser, buffer?: Buffer) => {
 	const { email, password, role } = payload;
 
 	const isExist = await prisma.user.findUnique({ where: { email } });
 
 	if (isExist) {
-		throw new AppError(400, "User is already exist. Please, login");
+		throw new AppError(400, "User already exist. Please, login");
 	}
 
 	if (role === Role.ADMIN || role === "SUPER_ADMIN") {
 		throw new AppError(
 			400,
-			"Currently, You are not eligable for registration. Please, contact with the Admin",
+			"You are not eligible for self-registration with this role. Please contact an Administrator.",
 		);
 	}
 
 	const hashedPassword = await bcrypt.hash(password, 8);
+
+	let profile_pic: string | null = null;
+	let profile_pic_public_id: string | null = null
+
+	if (buffer) {
+		const uploadResult = await new Promise<UploadApiResponse>((resolve, reject) => {
+			cloudinary.uploader.upload_stream(
+				{
+					resource_type: 'image'
+				},
+				(error, result) => {
+					if (error) {
+						return reject(error);
+					}
+					if (!result) {
+						return reject(new AppError(400, "Cloudinary upload failed without an error context."))
+					}
+					resolve(result)
+				}
+			).end(buffer)
+		})
+
+		profile_pic = uploadResult.secure_url;
+		profile_pic_public_id = uploadResult.public_id;
+	}
 
 	const user = await prisma.user.create({
 		data: {
@@ -33,7 +60,8 @@ const registerUserService = async (payload: IRegisterUser) => {
 			address: payload.address,
 			gender: payload.gender,
 			role: payload.role,
-			profile_pic: payload.profile_pic,
+			profile_pic,
+			profile_pic_public_id,
 			auth_provider: AuthProvider.CREDENTIAL,
 		},
 		omit: {
