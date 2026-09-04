@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Password Reset Successful</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f8;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #333333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .header {
+            background: #16a34a;
+            color: #ffffff;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        .content {
+            padding: 35px 30px;
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .content h2 {
+            margin: 0 0 15px;
+            color: #222222;
+        }
+
+        .content p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #666666;
+        }
+
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: #16a34a;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .footer {
+            padding: 20px 30px;
+            text-align: center;
+            background: #f8f9fa;
+            color: #999999;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="header">
+            <h1>Password Reset Successful</h1>
+        </div>
+
+        <div class="content">
+            <div class="success-icon">✓</div>
+
+            <h2>Hello <%= name || "there" %>!</h2>
+
+            <p>
+                Your password has been successfully reset.
+                You can now sign in to your account using your new password.
+            </p>
+
+            <% if (loginUrl) { %>
+                <a href="<%= loginUrl %>" class="button">
+                    Sign In
+                </a>
+                <% } %>
+
+                    <p style="margin-top: 30px; font-size: 14px;">
+                        If you did not make this change, please contact our support team
+                        immediately and secure your account.
+                    </p>
+        </div>
+
+        <div class="footer">
+            &copy; <%= new Date().getFullYear() %>
+                <%= appName || "Your App" %>.
+                    All rights reserved.
+        </div>
+
+    </div>
+</body>
+
+</html>

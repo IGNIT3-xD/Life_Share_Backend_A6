@@ -35,4 +35,16 @@ authRouter.get(
 
 authRouter.post("/refresh-token", AuthController.refreshTokenController);
 
+authRouter.post(
+	"/forget-password",
+	validateRequest(UserValidation.forgetPassEmail),
+	AuthController.forgetPasswordController
+);
+
+authRouter.post(
+	"/reset-password",
+	validateRequest(UserValidation.resetPassword),
+	AuthController.resetPasswordController
+);
+
 export default authRouter;

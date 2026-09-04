@@ -29,3 +29,9 @@ export interface IVerifyRegisterOtp {
 	email: string;
 	otp: string;
 }
+
+export interface IResetPassword {
+	email: string;
+	otp: string;
+	newPassword: string,
+}
