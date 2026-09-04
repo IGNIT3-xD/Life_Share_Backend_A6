@@ -18,6 +18,7 @@ import { redisClient } from "../../lib/redis";
 import { transporter } from "../../lib/nodemailer";
 import ejs from "ejs";
 import path from "node:path";
+import { isUserExist } from "../../utils/isUserExist";
 
 const registerUserService = async (payload: IRegisterUser, buffer?: Buffer) => {
 	const { email, password, role } = payload;
@@ -217,23 +218,8 @@ const verifyEmailService = async (payload: IVerifyRegisterOtp) => {
 const loginUserService = async (payload: ILoginUser) => {
 	const { email, password } = payload;
 
-	const user = await prisma.user.findUnique({ where: { email } });
-
-	if (!user) {
-		throw new AppError(404, "User not found");
-	}
-
-	if (!user.email_verified) {
-		throw new AppError(400, "User email is not verified.");
-	}
-
-	if (user.is_blocked) {
-		throw new AppError(400, "User is blocked.");
-	}
-
-	if (user.auth_provider === AuthProvider.GOOGLE) {
-		throw new AppError(400, "User is already registered with Google.");
-	}
+	const user = await isUserExist(email)
+	// console.log("From reusable function: ", user);
 
 	const matchedPassword = await bcrypt.compare(
 		password,
@@ -310,25 +296,27 @@ const refreshTokenService = async (rToken: string) => {
 };
 
 const forgetPasswordService = async (email: string) => {
-	const user = await prisma.user.findUnique({
-		where: { email },
-	});
+	// const user = await prisma.user.findUnique({
+	// 	where: { email },
+	// });
 
-	if (!user) {
-		throw new AppError(404, "User not found");
-	}
+	// if (!user) {
+	// 	throw new AppError(404, "User not found");
+	// }
 
-	if (!user.email_verified) {
-		throw new AppError(400, "User email is not verified");
-	}
+	// if (!user.email_verified) {
+	// 	throw new AppError(400, "User email is not verified");
+	// }
 
-	if (user.is_blocked) {
-		throw new AppError(400, "User is blocked.");
-	}
+	// if (user.is_blocked) {
+	// 	throw new AppError(400, "User is blocked.");
+	// }
 
-	if (user.auth_provider !== AuthProvider.CREDENTIAL) {
-		throw new AppError(404, "User has an account with Google.");
-	}
+	// if (user.auth_provider !== AuthProvider.CREDENTIAL) {
+	// 	throw new AppError(404, "User has an account with Google.");
+	// }
+
+	const user = await isUserExist(email)
 
 	const otp = crypto.randomInt(100000, 1000000).toString()
 	const otpKey = `forget-pass-otp:${email}`
@@ -358,25 +346,27 @@ const forgetPasswordService = async (email: string) => {
 const resetPasswordService = async (payload: IResetPassword) => {
 	const { email, otp, newPassword } = payload
 
-	const user = await prisma.user.findUnique({
-		where: { email },
-	});
+	// const user = await prisma.user.findUnique({
+	// 	where: { email },
+	// });
 
-	if (!user) {
-		throw new AppError(404, "User not found");
-	}
+	// if (!user) {
+	// 	throw new AppError(404, "User not found");
+	// }
 
-	if (!user.email_verified) {
-		throw new AppError(400, "User email is not verified");
-	}
+	// if (!user.email_verified) {
+	// 	throw new AppError(400, "User email is not verified");
+	// }
 
-	if (user.is_blocked) {
-		throw new AppError(400, "User is blocked.");
-	}
+	// if (user.is_blocked) {
+	// 	throw new AppError(400, "User is blocked.");
+	// }
 
-	if (user.auth_provider !== "CREDENTIAL") {
-		throw new AppError(404, "User has an account with Google.");
-	}
+	// if (user.auth_provider !== "CREDENTIAL") {
+	// 	throw new AppError(404, "User has an account with Google.");
+	// }
+
+	const user = await isUserExist(email)
 
 	const otpKey = `forget-pass-otp:${email}`
 
