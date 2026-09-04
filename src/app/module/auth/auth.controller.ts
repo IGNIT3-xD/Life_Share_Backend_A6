@@ -7,9 +7,21 @@ import type { IUser } from "./auth.interface";
 
 const registerUserController = catchAsync(
 	async (req: Request, res: Response) => {
-		const result = await AuthServices.registerUserService(req.body, req.file?.buffer);
+		await AuthServices.registerUserService(req.body, req.file?.buffer);
 
-		const { user, accessToken, refreshToken } = result;
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "OTP successfully send to your Email.",
+		});
+	},
+);
+
+const verifyEmailController = catchAsync(
+	async (req: Request, res: Response) => {
+		const result = await AuthServices.verifyEmailService(req.body);
+
+		const { createUser, accessToken, refreshToken } = result;
 
 		res.cookie("accessToken", accessToken, {
 			httpOnly: true,
@@ -27,9 +39,9 @@ const registerUserController = catchAsync(
 		sendResponse(res, {
 			statusCode: 200,
 			success: true,
-			message: "User registered successfully.",
+			message: "User registered successfuly.",
 			data: {
-				user,
+				user: createUser,
 				accessToken,
 				refreshToken,
 			},
@@ -67,7 +79,7 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getMeController = catchAsync(async (req: Request, res: Response) => {
-	const user = req.user as IUser
+	const user = req.user as IUser;
 
 	const result = await AuthServices.getMeService(user);
 
@@ -75,7 +87,7 @@ const getMeController = catchAsync(async (req: Request, res: Response) => {
 		statusCode: 200,
 		success: true,
 		message: "User profile retrieved successfully.",
-		data: result
+		data: result,
 	});
 });
 
@@ -85,7 +97,9 @@ const refreshTokenController = catchAsync(
 			throw new Error("Refresh token is missing");
 		}
 
-		const result = await AuthServices.refreshTokenService(req.cookies.refreshToken);
+		const result = await AuthServices.refreshTokenService(
+			req.cookies.refreshToken,
+		);
 
 		const { accessToken, refreshToken: newRefreshToken } = result;
 
@@ -116,7 +130,8 @@ const refreshTokenController = catchAsync(
 
 export const AuthController = {
 	registerUserController,
+	verifyEmailController,
 	loginUser,
 	getMeController,
-	refreshTokenController
+	refreshTokenController,
 };

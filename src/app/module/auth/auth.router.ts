@@ -9,27 +9,30 @@ import { upload } from "../../lib/multer";
 const authRouter = Router();
 
 authRouter.post(
-    "/register",
-    upload.single("profile_pic"),
-    validateRequest(UserValidation.registerUserValidation),
-    AuthController.registerUserController
+	"/register",
+	upload.single("profile_pic"),
+	validateRequest(UserValidation.registerUserValidation),
+	AuthController.registerUserController,
 );
 
 authRouter.post(
-    "/login",
-    validateRequest(UserValidation.loginUserValidation),
-    AuthController.loginUser
+	"/verify-email",
+	validateRequest(UserValidation.verifyEmail),
+	AuthController.verifyEmailController,
+);
+
+authRouter.post(
+	"/login",
+	validateRequest(UserValidation.loginUserValidation),
+	AuthController.loginUser,
 );
 
 authRouter.get(
-    "/me",
-    auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
-    AuthController.getMeController
+	"/me",
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
+	AuthController.getMeController,
 );
 
-authRouter.post(
-    "/refresh-token",
-    AuthController.refreshTokenController
-);
+authRouter.post("/refresh-token", AuthController.refreshTokenController);
 
 export default authRouter;

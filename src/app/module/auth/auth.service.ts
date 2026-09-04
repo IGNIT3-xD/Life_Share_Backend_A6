@@ -4,9 +4,19 @@ import bcrypt from "bcryptjs";
 import jwt, { type SignOptions, type JwtPayload } from "jsonwebtoken";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
-import type { ILoginUser, IRegisterUser, IUser } from "./auth.interface";
+import type {
+	ILoginUser,
+	IRegisterUser,
+	IUser,
+	IVerifyRegisterOtp,
+} from "./auth.interface";
 import cloudinary from "../../lib/cloudinary";
 import type { UploadApiResponse } from "cloudinary";
+import crypto from "node:crypto";
+import { redisClient } from "../../lib/redis";
+import { transporter } from "../../lib/nodemailer";
+import ejs from "ejs";
+import path from "node:path";
 
 const registerUserService = async (payload: IRegisterUser, buffer?: Buffer) => {
 	const { email, password, role } = payload;
@@ -27,41 +37,139 @@ const registerUserService = async (payload: IRegisterUser, buffer?: Buffer) => {
 	const hashedPassword = await bcrypt.hash(password, 8);
 
 	let profile_pic: string | null = null;
-	let profile_pic_public_id: string | null = null
+	let profile_pic_public_id: string | null = null;
 
 	if (buffer) {
-		const uploadResult = await new Promise<UploadApiResponse>((resolve, reject) => {
-			cloudinary.uploader.upload_stream(
-				{
-					resource_type: 'image'
-				},
-				(error, result) => {
-					if (error) {
-						return reject(error);
-					}
-					if (!result) {
-						return reject(new AppError(400, "Cloudinary upload failed without an error context."))
-					}
-					resolve(result)
-				}
-			).end(buffer)
-		})
+		const uploadResult = await new Promise<UploadApiResponse>(
+			(resolve, reject) => {
+				cloudinary.uploader
+					.upload_stream(
+						{
+							resource_type: "image",
+						},
+						(error, result) => {
+							if (error) {
+								return reject(error);
+							}
+							if (!result) {
+								return reject(
+									new AppError(
+										400,
+										"Cloudinary upload failed without an error context.",
+									),
+								);
+							}
+							resolve(result);
+						},
+					)
+					.end(buffer);
+			},
+		);
 
 		profile_pic = uploadResult.secure_url;
 		profile_pic_public_id = uploadResult.public_id;
 	}
 
-	const user = await prisma.user.create({
+	// Generate OTP and reserve un-verified data to the Redis
+	const otp = crypto.randomInt(100000, 1000000).toString();
+	const otpKey = `registration-otp:${email}`;
+	const expTime = 2 * 60;
+
+	await redisClient.set(otpKey, otp, {
+		expiration: {
+			type: "EX",
+			value: expTime,
+		},
+	});
+
+	const redisPayload = {
+		name: payload.name,
+		email,
+		password: hashedPassword,
+		role,
+		phone: payload.phone,
+		address: payload.address,
+		gender: payload.gender,
+		profile_pic,
+		profile_pic_public_id,
+		auth_provider: AuthProvider.CREDENTIAL,
+	};
+
+	const payloadKey = `user-data:${email}`;
+
+	await redisClient.set(payloadKey, JSON.stringify(redisPayload), {
+		expiration: {
+			type: "EX",
+			value: expTime,
+		},
+	});
+
+	const templatePath = path.join(
+		process.cwd(),
+		"src/app/templates/register-user-otp.ejs",
+	);
+
+	const html = await ejs.renderFile(templatePath, {
+		userName: payload.name,
+		otp,
+		expTime: expTime / 60,
+	});
+
+	await transporter.sendMail({
+		from: config.SMTP_EMAIL_SENDER,
+		to: email,
+		subject: "Verify Your Account",
+		html,
+	});
+};
+
+const verifyEmailService = async (payload: IVerifyRegisterOtp) => {
+	const { email, otp } = payload;
+
+	const user = await prisma.user.findUnique({ where: { email } });
+
+	if (user?.is_blocked) {
+		throw new AppError(400, "User is blocked.");
+	}
+
+	if (user?.email_verified) {
+		throw new AppError(400, "Email is already verified.");
+	}
+
+	const otpKey = `registration-otp:${email}`;
+	const redisOtp = await redisClient.get(otpKey);
+
+	if (!redisOtp) {
+		throw new Error("No OTP found");
+	}
+
+	if (redisOtp !== otp) {
+		throw new Error("Invalid OTP !!!");
+	}
+
+	await redisClient.del([otpKey]);
+
+	const payloadKey = `user-data:${email}`;
+	const redisPayload = await redisClient.get(payloadKey);
+
+	if (!redisPayload) {
+		throw new AppError(404, "No user data found.");
+	}
+
+	const userData: IRegisterUser = JSON.parse(redisPayload);
+
+	const createUser = await prisma.user.create({
 		data: {
-			name: payload.name,
-			email: payload.email,
-			password: hashedPassword,
-			phone: payload.phone,
-			address: payload.address,
-			gender: payload.gender,
-			role: payload.role,
-			profile_pic,
-			profile_pic_public_id,
+			name: userData.name,
+			email: userData.email,
+			password: userData.password,
+			phone: userData.phone,
+			address: userData.address,
+			gender: userData.gender,
+			role: userData.role,
+			email_verified: true,
+			profile_pic: userData.profile_pic,
+			profile_pic_public_id: userData.profile_pic_public_id,
 			auth_provider: AuthProvider.CREDENTIAL,
 		},
 		omit: {
@@ -69,11 +177,13 @@ const registerUserService = async (payload: IRegisterUser, buffer?: Buffer) => {
 		},
 	});
 
+	await redisClient.del([payloadKey]);
+
 	const jwtPayload = {
-		userId: user.id,
-		name: user.name,
-		email: user.email,
-		role: user.role,
+		userId: createUser.id,
+		name: createUser.name,
+		email: createUser.email,
+		role: createUser.role,
 	} as JwtPayload;
 
 	const accessToken = jwt.sign(jwtPayload, config.JWT_ACCESS, {
@@ -84,7 +194,23 @@ const registerUserService = async (payload: IRegisterUser, buffer?: Buffer) => {
 		expiresIn: config.JWT_REFRESH_EXPIRES_IN,
 	} as SignOptions);
 
-	return { user, accessToken, refreshToken };
+	const templatePath = path.join(
+		process.cwd(),
+		"src/app/templates/welcome.ejs",
+	);
+
+	const html = await ejs.renderFile(templatePath, {
+		name: createUser.name,
+	});
+
+	await transporter.sendMail({
+		from: config.SMTP_EMAIL_SENDER,
+		to: createUser.email,
+		subject: "Welcome To Life Share",
+		html,
+	});
+
+	return { createUser, accessToken, refreshToken };
 };
 
 const loginUserService = async (payload: ILoginUser) => {
@@ -94,6 +220,18 @@ const loginUserService = async (payload: ILoginUser) => {
 
 	if (!user) {
 		throw new AppError(404, "User not found");
+	}
+
+	if (!user.email_verified) {
+		throw new AppError(400, "User email is not verified.");
+	}
+
+	if (user.is_blocked) {
+		throw new AppError(400, "User is blocked.");
+	}
+
+	if (user.auth_provider === AuthProvider.GOOGLE) {
+		throw new AppError(400, "User is already registered with Google.");
 	}
 
 	const matchedPassword = await bcrypt.compare(
@@ -129,20 +267,20 @@ const getMeService = async (user: IUser) => {
 			email: user.email,
 			id: user.userId,
 		},
-		omit: { password: true }
+		omit: { password: true },
 	});
 
 	if (!userData) {
 		throw new AppError(404, "User not found");
 	}
 
-	return userData
-}
+	return userData;
+};
 
 const refreshTokenService = async (rToken: string) => {
-	const verfyToken = jwt.verify(rToken, config.JWT_REFRESH) as JwtPayload
+	const verfyToken = jwt.verify(rToken, config.JWT_REFRESH) as JwtPayload;
 
-	const { userId, name, email, role } = verfyToken
+	const { userId, name, email, role } = verfyToken;
 
 	const user = await prisma.user.findUnique({
 		where: { id: userId, email },
@@ -168,10 +306,11 @@ const refreshTokenService = async (rToken: string) => {
 	} as SignOptions);
 
 	return { accessToken, refreshToken };
-}
+};
 
 export const AuthServices = {
 	registerUserService,
+	verifyEmailService,
 	loginUserService,
 	getMeService,
 	refreshTokenService,
