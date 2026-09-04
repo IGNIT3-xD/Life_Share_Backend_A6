@@ -51,6 +51,7 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
+  Donor: 'Donor',
   User: 'User'
 } as const
 
@@ -68,6 +69,26 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const DonorScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  blood_group: 'blood_group',
+  location: 'location',
+  age: 'age',
+  availability: 'availability',
+  weightKg: 'weightKg',
+  height: 'height',
+  donorStatus: 'donorStatus',
+  totalDonations: 'totalDonations',
+  lastDonationDate: 'lastDonationDate',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  userId: 'userId'
+} as const
+
+export type DonorScalarFieldEnum = (typeof DonorScalarFieldEnum)[keyof typeof DonorScalarFieldEnum]
 
 
 export const UserScalarFieldEnum = {

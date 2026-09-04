@@ -1,0 +1,25 @@
+model Donor {
+    id           String            @id @default(uuid())
+    email        String            @unique
+    blood_group  BloodGroup
+    location     String
+    age          Int
+    availability DonorAvailability @default(AVAILABLE)
+    weightKg     Decimal           @db.Decimal(10, 2)
+    height       Decimal           @db.Decimal(10, 2)
+    donorStatus  DonorStatus       @default(IN_PROGRESS)
+
+    totalDonations   Int?      @default(0)
+    lastDonationDate DateTime?
+
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+
+    userId String @unique
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+    @@index([location], name: "idx_donor_location")
+    @@index([blood_group], name: "idx_donor_blood_grp")
+    @@index([email], name: "idx_donor_email")
+    @@map("donor")
+}

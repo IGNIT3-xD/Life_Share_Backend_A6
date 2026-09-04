@@ -33,5 +33,5 @@ export interface IVerifyRegisterOtp {
 export interface IResetPassword {
 	email: string;
 	otp: string;
-	newPassword: string,
+	newPassword: string;
 }

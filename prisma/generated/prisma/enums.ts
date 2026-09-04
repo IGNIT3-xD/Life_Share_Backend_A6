@@ -44,3 +44,35 @@ export const AuthProvider = {
 } as const
 
 export type AuthProvider = (typeof AuthProvider)[keyof typeof AuthProvider]
+
+
+export const BloodGroup = {
+  A_POS: 'A_POS',
+  A_NEG: 'A_NEG',
+  B_POS: 'B_POS',
+  B_NEG: 'B_NEG',
+  AB_POS: 'AB_POS',
+  AB_NEG: 'AB_NEG',
+  O_POS: 'O_POS',
+  O_NEG: 'O_NEG'
+} as const
+
+export type BloodGroup = (typeof BloodGroup)[keyof typeof BloodGroup]
+
+
+export const DonorAvailability = {
+  AVAILABLE: 'AVAILABLE',
+  UNAVAILABLE: 'UNAVAILABLE',
+  ON_HOLD: 'ON_HOLD'
+} as const
+
+export type DonorAvailability = (typeof DonorAvailability)[keyof typeof DonorAvailability]
+
+
+export const DonorStatus = {
+  VERIFIED: 'VERIFIED',
+  NOT_ELIGIBLE: 'NOT_ELIGIBLE',
+  IN_PROGRESS: 'IN_PROGRESS'
+} as const
+
+export type DonorStatus = (typeof DonorStatus)[keyof typeof DonorStatus]

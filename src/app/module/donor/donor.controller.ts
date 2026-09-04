@@ -1,0 +1,24 @@
+import { catchAsync } from "../../utils/catchAsync";
+import type { Request, Response } from "express";
+import type { IUser } from "../auth/auth.interface";
+import { DonorService } from "./donor.service";
+import sendResponse from "../../utils/sendResponse";
+
+const createDonorProfileController = catchAsync(
+	async (req: Request, res: Response) => {
+		const user = req.user as IUser;
+
+		const result = await DonorService.createDonorProfileService(req.body, user);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "Donor profile created successfully",
+			data: result,
+		});
+	},
+);
+
+export const DonorController = {
+	createDonorProfileController,
+};

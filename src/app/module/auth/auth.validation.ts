@@ -53,7 +53,7 @@ const verifyEmail = z.object({
 });
 
 const forgetPassEmail = z.object({
-	email: z.email()
+	email: z.email(),
 });
 
 const resetPassword = z.object({
@@ -69,7 +69,7 @@ const resetPassword = z.object({
 		.regex(
 			/[^A-Za-z0-9\s]/,
 			"Password must contain at least 1 special character.",
-		)
+		),
 });
 
 export const UserValidation = {
@@ -77,5 +77,5 @@ export const UserValidation = {
 	verifyEmail,
 	loginUserValidation,
 	forgetPassEmail,
-	resetPassword
+	resetPassword,
 };

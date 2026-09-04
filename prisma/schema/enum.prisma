@@ -22,3 +22,26 @@ enum AuthProvider {
     CREDENTIAL
     GOOGLE
 }
+
+enum BloodGroup {
+    A_POS
+    A_NEG
+    B_POS
+    B_NEG
+    AB_POS
+    AB_NEG
+    O_POS
+    O_NEG
+}
+
+enum DonorAvailability {
+    AVAILABLE
+    UNAVAILABLE
+    ON_HOLD
+}
+
+enum DonorStatus {
+    VERIFIED
+    NOT_ELIGIBLE
+    IN_PROGRESS
+}

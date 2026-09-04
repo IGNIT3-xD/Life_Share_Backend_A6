@@ -128,27 +128,31 @@ const refreshTokenController = catchAsync(
 	},
 );
 
-const forgetPasswordController = catchAsync(async (req: Request, res: Response) => {
-	const { email } = req.body;
+const forgetPasswordController = catchAsync(
+	async (req: Request, res: Response) => {
+		const { email } = req.body;
 
-	await AuthServices.forgetPasswordService(email)
+		await AuthServices.forgetPasswordService(email);
 
-	sendResponse(res, {
-		statusCode: 200,
-		success: true,
-		message: "Reset password OTP successfully send to your Email.",
-	});
-})
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "Reset password OTP successfully send to your Email.",
+		});
+	},
+);
 
-const resetPasswordController = catchAsync(async (req: Request, res: Response) => {
-	await AuthServices.resetPasswordService(req.body)
+const resetPasswordController = catchAsync(
+	async (req: Request, res: Response) => {
+		await AuthServices.resetPasswordService(req.body);
 
-	sendResponse(res, {
-		statusCode: 200,
-		success: true,
-		message: "Reset password successfully.",
-	});
-})
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "Reset password successfully.",
+		});
+	},
+);
 
 export const AuthController = {
 	registerUserController,
@@ -157,5 +161,5 @@ export const AuthController = {
 	getMeController,
 	refreshTokenController,
 	forgetPasswordController,
-	resetPasswordController
+	resetPasswordController,
 };
