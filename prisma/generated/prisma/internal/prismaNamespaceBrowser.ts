@@ -115,6 +115,7 @@ export const RequesterScalarFieldEnum = {
   exact_location: 'exact_location',
   expires_at: 'expires_at',
   urgency: 'urgency',
+  verificationStatus: 'verificationStatus',
   request_status: 'request_status',
   note: 'note',
   user_id: 'user_id',

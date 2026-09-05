@@ -36,7 +36,7 @@ const verifyEmailController = catchAsync(
 		});
 
 		sendResponse(res, {
-			statusCode: 200,
+			statusCode: 201,
 			success: true,
 			message: "User registered successfuly.",
 			data: {
@@ -76,7 +76,6 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
 		},
 	});
 });
-
 
 const refreshTokenController = catchAsync(
 	async (req: Request, res: Response) => {

@@ -8,16 +8,16 @@ import { UserValidation } from "./user.validation";
 const userRouter = Router();
 
 userRouter.get(
-    "/me",
-    auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
-    UserController.getMeController,
+	"/me",
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
+	UserController.getMeController,
 );
 
 userRouter.post(
-    "/blood-request",
-    auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
-    validateRequest(UserValidation.makeBloodRequestValidate),
-    UserController.makeBloodRequestController,
+	"/blood-request",
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
+	validateRequest(UserValidation.makeBloodRequestValidate),
+	UserController.makeBloodRequestController,
 );
 
 export default userRouter;

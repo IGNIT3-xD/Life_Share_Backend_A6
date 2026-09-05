@@ -8,8 +8,9 @@ model Requester {
 
     expires_at DateTime
 
-    urgency        RequestUrgency
-    request_status RequestStatus  @default(PENDING)
+    urgency            RequestUrgency
+    verificationStatus VerificationStatus @default(PENDING)
+    request_status     RequestStatus      @default(PENDING)
 
     note String?
 

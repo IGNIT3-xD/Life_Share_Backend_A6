@@ -797,6 +797,7 @@ export const RequesterScalarFieldEnum = {
   exact_location: 'exact_location',
   expires_at: 'expires_at',
   urgency: 'urgency',
+  verificationStatus: 'verificationStatus',
   request_status: 'request_status',
   note: 'note',
   user_id: 'user_id',
@@ -982,6 +983,20 @@ export type EnumRequestUrgencyFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  * Reference to a field of type 'RequestUrgency[]'
  */
 export type ListEnumRequestUrgencyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RequestUrgency[]'>
+    
+
+
+/**
+ * Reference to a field of type 'VerificationStatus'
+ */
+export type EnumVerificationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'VerificationStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'VerificationStatus[]'
+ */
+export type ListEnumVerificationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'VerificationStatus[]'>
     
 
 

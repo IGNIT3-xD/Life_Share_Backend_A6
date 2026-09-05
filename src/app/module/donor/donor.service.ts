@@ -1,5 +1,4 @@
-import { Prisma } from "../../../../prisma/generated/prisma/client";
-import { DonorStatus, Role } from "../../../../prisma/generated/prisma/enums";
+import { DonorStatus } from "../../../../prisma/generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import { validateUserById } from "../../utils/isUserExist";

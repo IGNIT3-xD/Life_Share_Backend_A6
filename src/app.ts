@@ -5,6 +5,7 @@ import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 import authRouter from "./app/module/auth/auth.router";
 import donorRouter from "./app/module/donor/donor.route";
 import userRouter from "./app/module/user/user.router";
+import donationRouter from "./app/module/donation/donation.router";
 
 const app: Application = express();
 
@@ -22,6 +23,7 @@ app.get("/", (_req: Request, res: Response) => {
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/donor", donorRouter);
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/donation", donationRouter);
 
 app.use(globalErrorHandler);
 

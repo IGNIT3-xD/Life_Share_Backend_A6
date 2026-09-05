@@ -1,5 +1,8 @@
 import z from "zod";
-import { BloodGroup, RequestStatus, RequestUrgency } from "../../../../prisma/generated/prisma/enums";
+import {
+	BloodGroup,
+	RequestUrgency,
+} from "../../../../prisma/generated/prisma/enums";
 
 const makeBloodRequestValidate = z.object({
 	patientName: z

@@ -11,7 +11,7 @@ const createDonorProfileController = catchAsync(
 		const result = await DonorService.createDonorProfileService(req.body, user);
 
 		sendResponse(res, {
-			statusCode: 200,
+			statusCode: 201,
 			success: true,
 			message: "Donor profile created successfully",
 			data: result,

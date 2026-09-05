@@ -8,7 +8,6 @@ import type {
 	ILoginUser,
 	IRegisterUser,
 	IResetPassword,
-	IUser,
 	IVerifyRegisterOtp,
 } from "./auth.interface";
 import cloudinary from "../../lib/cloudinary";
@@ -257,7 +256,7 @@ const refreshTokenService = async (rToken: string) => {
 		where: { id: userId, email },
 	});
 
-	if (!user || !user?.is_active || user.is_blocked) {
+	if (!user?.is_active || user.is_blocked) {
 		throw new Error("User is inactive / blocked or not found.");
 	}
 
