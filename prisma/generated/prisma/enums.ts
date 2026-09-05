@@ -76,3 +76,36 @@ export const DonorStatus = {
 } as const
 
 export type DonorStatus = (typeof DonorStatus)[keyof typeof DonorStatus]
+
+
+export const RequestUrgency = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  EMERGENCY: 'EMERGENCY',
+  CRITICAL: 'CRITICAL'
+} as const
+
+export type RequestUrgency = (typeof RequestUrgency)[keyof typeof RequestUrgency]
+
+
+export const RequestStatus = {
+  PENDING: 'PENDING',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type RequestStatus = (typeof RequestStatus)[keyof typeof RequestStatus]
+
+
+export const DonationStatus = {
+  PENDING: 'PENDING',
+  ACCEPTED: 'ACCEPTED',
+  SCHEDULED: 'SCHEDULED',
+  COMPLETED: 'COMPLETED',
+  DONOR_CANCELLED: 'DONOR_CANCELLED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type DonationStatus = (typeof DonationStatus)[keyof typeof DonationStatus]

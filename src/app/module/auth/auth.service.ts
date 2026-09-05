@@ -248,22 +248,6 @@ const loginUserService = async (payload: ILoginUser) => {
 	return { accessToken, refreshToken };
 };
 
-const getMeService = async (user: IUser) => {
-	const userData = await prisma.user.findUnique({
-		where: {
-			email: user.email,
-			id: user.userId,
-		},
-		omit: { password: true },
-	});
-
-	if (!userData) {
-		throw new AppError(404, "User not found");
-	}
-
-	return userData;
-};
-
 const refreshTokenService = async (rToken: string) => {
 	const verfyToken = jwt.verify(rToken, config.JWT_REFRESH) as JwtPayload;
 
@@ -416,7 +400,6 @@ export const AuthServices = {
 	registerUserService,
 	verifyEmailService,
 	loginUserService,
-	getMeService,
 	refreshTokenService,
 	forgetPasswordService,
 	resetPasswordService,

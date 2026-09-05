@@ -3,7 +3,6 @@ import config from "../../config";
 import { catchAsync } from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
-import type { IUser } from "./auth.interface";
 
 const registerUserController = catchAsync(
 	async (req: Request, res: Response) => {
@@ -78,18 +77,6 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
-const getMeController = catchAsync(async (req: Request, res: Response) => {
-	const user = req.user as IUser;
-
-	const result = await AuthServices.getMeService(user);
-
-	sendResponse(res, {
-		statusCode: 200,
-		success: true,
-		message: "User profile retrieved successfully.",
-		data: result,
-	});
-});
 
 const refreshTokenController = catchAsync(
 	async (req: Request, res: Response) => {
@@ -158,7 +145,6 @@ export const AuthController = {
 	registerUserController,
 	verifyEmailController,
 	loginUser,
-	getMeController,
 	refreshTokenController,
 	forgetPasswordController,
 	resetPasswordController,

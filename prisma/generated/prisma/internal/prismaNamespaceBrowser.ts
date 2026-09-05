@@ -51,7 +51,9 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
+  Donation: 'Donation',
   Donor: 'Donor',
+  Requester: 'Requester',
   User: 'User'
 } as const
 
@@ -69,6 +71,20 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const DonationScalarFieldEnum = {
+  id: 'id',
+  requester_id: 'requester_id',
+  donor_id: 'donor_id',
+  donationStatus: 'donationStatus',
+  scheduled_at: 'scheduled_at',
+  donated_at: 'donated_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type DonationScalarFieldEnum = (typeof DonationScalarFieldEnum)[keyof typeof DonationScalarFieldEnum]
 
 
 export const DonorScalarFieldEnum = {
@@ -89,6 +105,24 @@ export const DonorScalarFieldEnum = {
 } as const
 
 export type DonorScalarFieldEnum = (typeof DonorScalarFieldEnum)[keyof typeof DonorScalarFieldEnum]
+
+
+export const RequesterScalarFieldEnum = {
+  id: 'id',
+  patientName: 'patientName',
+  blood_group: 'blood_group',
+  unit_required: 'unit_required',
+  exact_location: 'exact_location',
+  expires_at: 'expires_at',
+  urgency: 'urgency',
+  request_status: 'request_status',
+  note: 'note',
+  user_id: 'user_id',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type RequesterScalarFieldEnum = (typeof RequesterScalarFieldEnum)[keyof typeof RequesterScalarFieldEnum]
 
 
 export const UserScalarFieldEnum = {

@@ -31,8 +31,8 @@ export * from "./enums"
  * const prisma = new PrismaClient({
  *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
  * })
- * // Fetch zero or more Donors
- * const donors = await prisma.donor.findMany()
+ * // Fetch zero or more Donations
+ * const donations = await prisma.donation.findMany()
  * ```
  * 
  * Read more in our [docs](https://pris.ly/d/client).
@@ -42,10 +42,20 @@ export type PrismaClient<LogOpts extends Prisma.LogLevel = never, OmitOpts exten
 export { Prisma }
 
 /**
+ * Model Donation
+ * 
+ */
+export type Donation = Prisma.DonationModel
+/**
  * Model Donor
  * 
  */
 export type Donor = Prisma.DonorModel
+/**
+ * Model Requester
+ * 
+ */
+export type Requester = Prisma.RequesterModel
 /**
  * Model User
  * 

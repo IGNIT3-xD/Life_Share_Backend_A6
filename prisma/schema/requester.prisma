@@ -1,0 +1,26 @@
+model Requester {
+    id String @id @default(uuid())
+
+    patientName    String
+    blood_group    BloodGroup
+    unit_required  Int
+    exact_location String
+
+    expires_at DateTime
+
+    urgency        RequestUrgency
+    request_status RequestStatus  @default(PENDING)
+
+    note String?
+
+    user_id String
+    user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+
+    donations Donation[]
+
+    @@index([urgency, blood_group, exact_location, expires_at], name: "idx_requester")
+    @@map("requester")
+}

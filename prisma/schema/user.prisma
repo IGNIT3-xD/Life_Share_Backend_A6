@@ -5,7 +5,7 @@ model User {
     password String?
     phone    String?
     address  String?
-    gender   Gender
+    gender   Gender?
 
     profile_pic           String?
     profile_pic_public_id String?
@@ -20,8 +20,8 @@ model User {
     created_at DateTime @default(now())
     updated_at DateTime @updatedAt
 
-    donor Donor?
+    donor      Donor?
+    requesters Requester[]
 
-    @@index([email], name: "idx_user_email")
     @@map("users")
 }

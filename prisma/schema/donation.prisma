@@ -1,0 +1,18 @@
+model Donation {
+    id String @id @default(uuid())
+
+    requester_id String
+    requester    Requester @relation(fields: [requester_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+    donor_id String
+    donor    Donor  @relation(fields: [donor_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+    donationStatus DonationStatus @default(PENDING)
+    scheduled_at   DateTime?
+    donated_at     DateTime?
+
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+
+    @@map("donations")
+}

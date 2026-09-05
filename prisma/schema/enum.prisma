@@ -45,3 +45,27 @@ enum DonorStatus {
     NOT_ELIGIBLE
     IN_PROGRESS
 }
+
+enum RequestUrgency {
+    LOW
+    MEDIUM
+    HIGH
+    EMERGENCY
+    CRITICAL
+}
+
+enum RequestStatus {
+    PENDING
+    IN_PROGRESS
+    COMPLETED
+    CANCELLED
+}
+
+enum DonationStatus {
+    PENDING
+    ACCEPTED
+    SCHEDULED
+    COMPLETED
+    DONOR_CANCELLED
+    REJECTED
+}

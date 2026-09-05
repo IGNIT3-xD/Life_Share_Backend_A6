@@ -27,12 +27,6 @@ authRouter.post(
 	AuthController.loginUser,
 );
 
-authRouter.get(
-	"/me",
-	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
-	AuthController.getMeController,
-);
-
 authRouter.post("/refresh-token", AuthController.refreshTokenController);
 
 authRouter.post(

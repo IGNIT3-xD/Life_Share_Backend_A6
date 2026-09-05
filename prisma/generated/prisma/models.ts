@@ -8,6 +8,8 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/Donation'
 export type * from './models/Donor'
+export type * from './models/Requester'
 export type * from './models/User'
 export type * from './commonInputTypes'
