@@ -14,4 +14,12 @@ donorRouter.post(
 	DonorController.createDonorProfileController,
 );
 
+donorRouter.get("/", DonorController.getAllDonorsController);
+
+donorRouter.get(
+	"/donation-request",
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL),
+	DonorController.getDonationRequestController
+);
+
 export default donorRouter;

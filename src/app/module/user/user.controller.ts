@@ -32,7 +32,22 @@ const makeBloodRequestController = catchAsync(
 	},
 );
 
+const getAllRequesterController = catchAsync(
+	async (req: Request, res: Response) => {
+		const result = await UserService.getAllRequestersService();
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "Requester retrieved successfully",
+			data: result,
+		});
+	},
+);
+
 export const UserController = {
 	getMeController,
 	makeBloodRequestController,
+	getAllRequesterController,
+
 };

@@ -39,6 +39,26 @@ const createDonorProfileService = async (payload: IDonor, user: IUser) => {
 	return donor;
 };
 
+const getAllDonorsService = async () => {
+	const donor = await prisma.donor.findMany()
+
+	return donor
+}
+
+const getDonationRequestService = async (user: IUser) => {
+	const donation = await prisma.donation.findMany({
+		where: {
+			donor: {
+				userId: user.userId
+			}
+		}
+	})
+
+	return donation
+}
+
 export const DonorService = {
 	createDonorProfileService,
+	getAllDonorsService,
+	getDonationRequestService
 };

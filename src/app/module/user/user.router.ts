@@ -20,4 +20,6 @@ userRouter.post(
 	UserController.makeBloodRequestController,
 );
 
+userRouter.get("/requester", UserController.getAllRequesterController);
+
 export default userRouter;

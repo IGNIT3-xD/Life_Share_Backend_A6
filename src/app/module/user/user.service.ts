@@ -1,3 +1,4 @@
+import { isPast } from "date-fns";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import { validateUserById } from "../../utils/isUserExist";
@@ -25,6 +26,15 @@ const makeBloodRequestService = async (
 ) => {
 	const isUserExist = await validateUserById(user.userId);
 
+	const targetDate = new Date(payload.expires_at);
+
+	if (isPast(targetDate)) {
+		throw new AppError(
+			400,
+			"The expire date cannot be in the past.",
+		);
+	}
+
 	const bloodRequest = await prisma.requester.create({
 		data: {
 			user_id: isUserExist.id,
@@ -44,7 +54,14 @@ const makeBloodRequestService = async (
 	return bloodRequest;
 };
 
+const getAllRequestersService = async () => {
+	const requester = await prisma.requester.findMany()
+
+	return requester
+}
+
 export const UserService = {
 	getMeService,
 	makeBloodRequestService,
+	getAllRequestersService
 };
