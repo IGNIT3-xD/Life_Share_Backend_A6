@@ -44,4 +44,10 @@ donorRouter.patch(
 	DonorController.updateDonorProfileController,
 );
 
+donorRouter.get(
+	"/my-donation-request",
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
+	DonorController.getDonorRequestController
+);
+
 export default donorRouter;

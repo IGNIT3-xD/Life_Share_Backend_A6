@@ -109,7 +109,22 @@ const updateDonorProfileController = catchAsync(
 		sendResponse(res, {
 			statusCode: 200,
 			success: true,
-			message: "Donar profile updated successfully",
+			message: "Donor profile updated successfully",
+			data: result,
+		});
+	}
+);
+
+const getDonorRequestController = catchAsync(
+	async (req: Request, res: Response) => {
+		const user = req.user as IUser;
+
+		const result = await DonorService.getDonorRequestService(user);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "Donor requesters retrieved successfully",
 			data: result,
 		});
 	}
@@ -122,5 +137,6 @@ export const DonorController = {
 	getDetailsDonationRequestController,
 	updateDonationRequestController,
 	getDonorProfileController,
-	updateDonorProfileController
+	updateDonorProfileController,
+	getDonorRequestController
 };

@@ -199,7 +199,7 @@ const getDonorProfileService = async (donor_id: string) => {
 	}
 
 	return donor
-}
+};
 
 const updateDonorProfileService = async (user: IUser, payload: IUpdateDonor) => {
 	const donor = await prisma.donor.findUnique({
@@ -224,6 +224,28 @@ const updateDonorProfileService = async (user: IUser, payload: IUpdateDonor) => 
 	})
 
 	return updateDonorProfile
+};
+
+const getDonorRequestService = async (user: IUser) => {
+	const donor = await prisma.donor.findUnique({
+		where: { userId: user.userId }
+	})
+
+	if (!donor) {
+		throw new AppError(404, "Donor not found found.")
+	}
+
+	const donations = await prisma.donation.findMany({
+		where: {
+			donor_id: donor.id
+		}
+	})
+
+	if (!donations) {
+		throw new AppError(404, "No donation request found.")
+	}
+
+	return donations
 }
 
 export const DonorService = {
@@ -233,5 +255,6 @@ export const DonorService = {
 	getDetailsDonationRequestService,
 	updateDonationRequestService,
 	getDonorProfileService,
-	updateDonorProfileService
+	updateDonorProfileService,
+	getDonorRequestService
 };
