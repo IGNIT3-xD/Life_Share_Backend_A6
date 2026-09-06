@@ -8,7 +8,7 @@ import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import { validateUserById } from "../../utils/isUserExist";
 import type { IUser } from "../auth/auth.interface";
-import type { IDonor, IUpdateDonation } from "./donor.interface";
+import type { IDonor, IUpdateDonation, IUpdateDonor } from "./donor.interface";
 
 const createDonorProfileService = async (payload: IDonor, user: IUser) => {
 	const isUserExist = await validateUserById(user.userId);
@@ -179,10 +179,59 @@ const updateDonationRequestService = async (
 	return result;
 };
 
+const getDonorProfileService = async (donor_id: string) => {
+	const donor = await prisma.donor.findUnique({
+		where: { id: donor_id },
+		include: {
+			user: {
+				select: {
+					name: true,
+					gender: true,
+					phone: true,
+					profile_pic: true
+				}
+			}
+		}
+	})
+
+	if (!donor) {
+		throw new AppError(404, "Donor profile not found.")
+	}
+
+	return donor
+}
+
+const updateDonorProfileService = async (user: IUser, payload: IUpdateDonor) => {
+	const donor = await prisma.donor.findUnique({
+		where: { userId: user.userId }
+	})
+
+	if (!donor) {
+		throw new AppError(404, "Donor profile not found.")
+	}
+
+	const updateDonorProfile = await prisma.donor.update({
+		where: {
+			userId: user.userId
+		},
+		data: {
+			blood_group: payload.blood_group,
+			age: payload.age,
+			availability: payload.availability,
+			weightKg: payload.weightKg,
+			height: payload.height
+		}
+	})
+
+	return updateDonorProfile
+}
+
 export const DonorService = {
 	createDonorProfileService,
 	getAllDonorsService,
 	getDonationRequestService,
 	getDetailsDonationRequestService,
 	updateDonationRequestService,
+	getDonorProfileService,
+	updateDonorProfileService
 };

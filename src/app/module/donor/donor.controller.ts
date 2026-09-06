@@ -85,10 +85,42 @@ const updateDonationRequestController = catchAsync(
 	},
 );
 
+const getDonorProfileController = catchAsync(
+	async (req: Request, res: Response) => {
+		const donor_id = req.params.id as string
+
+		const result = await DonorService.getDonorProfileService(donor_id);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "Donor profile retrieved successfully",
+			data: result,
+		});
+	}
+);
+
+const updateDonorProfileController = catchAsync(
+	async (req: Request, res: Response) => {
+		const user = req.user as IUser;
+
+		const result = await DonorService.updateDonorProfileService(user, req.body);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "Donar profile updated successfully",
+			data: result,
+		});
+	}
+);
+
 export const DonorController = {
 	createDonorProfileController,
 	getAllDonorsController,
 	getDonationRequestController,
 	getDetailsDonationRequestController,
 	updateDonationRequestController,
+	getDonorProfileController,
+	updateDonorProfileController
 };

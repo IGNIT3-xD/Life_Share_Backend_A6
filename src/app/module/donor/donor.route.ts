@@ -35,4 +35,13 @@ donorRouter.patch(
 	DonorController.updateDonationRequestController,
 );
 
+donorRouter.get("/donor-profile/:id", DonorController.getDonorProfileController);
+
+donorRouter.patch(
+	"/donor-profile",
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
+	validateRequest(DonorValidtaion.updateDonorProfileValidate),
+	DonorController.updateDonorProfileController,
+);
+
 export default donorRouter;
