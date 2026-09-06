@@ -29,10 +29,7 @@ const makeBloodRequestService = async (
 	const targetDate = new Date(payload.expires_at);
 
 	if (isPast(targetDate)) {
-		throw new AppError(
-			400,
-			"The expire date cannot be in the past.",
-		);
+		throw new AppError(400, "The expire date cannot be in the past.");
 	}
 
 	const bloodRequest = await prisma.requester.create({
@@ -55,13 +52,13 @@ const makeBloodRequestService = async (
 };
 
 const getAllRequestersService = async () => {
-	const requester = await prisma.requester.findMany()
+	const requester = await prisma.requester.findMany();
 
-	return requester
-}
+	return requester;
+};
 
 export const UserService = {
 	getMeService,
 	makeBloodRequestService,
-	getAllRequestersService
+	getAllRequestersService,
 };

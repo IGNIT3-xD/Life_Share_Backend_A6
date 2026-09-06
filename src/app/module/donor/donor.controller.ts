@@ -34,7 +34,7 @@ const getAllDonorsController = catchAsync(
 
 const getDonationRequestController = catchAsync(
 	async (req: Request, res: Response) => {
-		const user = req.user as IUser
+		const user = req.user as IUser;
 		const result = await DonorService.getDonationRequestService(user);
 
 		sendResponse(res, {
@@ -46,8 +46,49 @@ const getDonationRequestController = catchAsync(
 	},
 );
 
+const getDetailsDonationRequestController = catchAsync(
+	async (req: Request, res: Response) => {
+		const user = req.user as IUser;
+		const donation_id = req.params.id as string;
+
+		const result = await DonorService.getDetailsDonationRequestService(
+			user,
+			donation_id,
+		);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "Donation request retrieved successfully",
+			data: result,
+		});
+	},
+);
+
+const updateDonationRequestController = catchAsync(
+	async (req: Request, res: Response) => {
+		const user = req.user as IUser;
+		const donation_id = req.params.id as string;
+
+		const result = await DonorService.updateDonationRequestService(
+			user,
+			donation_id,
+			req.body,
+		);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "Donation request updated successfully",
+			data: result,
+		});
+	},
+);
+
 export const DonorController = {
 	createDonorProfileController,
 	getAllDonorsController,
-	getDonationRequestController
+	getDonationRequestController,
+	getDetailsDonationRequestController,
+	updateDonationRequestController,
 };

@@ -19,7 +19,20 @@ donorRouter.get("/", DonorController.getAllDonorsController);
 donorRouter.get(
 	"/donation-request",
 	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL),
-	DonorController.getDonationRequestController
+	DonorController.getDonationRequestController,
+);
+
+donorRouter.get(
+	"/donation-request/:id",
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL),
+	DonorController.getDetailsDonationRequestController,
+);
+
+donorRouter.patch(
+	"/donation-request/:id",
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL),
+	validateRequest(DonorValidtaion.updateDonationRequestValidate),
+	DonorController.updateDonationRequestController,
 );
 
 export default donorRouter;

@@ -1,5 +1,6 @@
 import type {
 	BloodGroup,
+	DonationStatus,
 	DonorAvailability,
 } from "../../../../prisma/generated/prisma/enums";
 
@@ -13,4 +14,8 @@ export interface IDonor {
 	height: number;
 	totalDonations?: number | null;
 	lastDonationDate?: Date | null;
+}
+
+export interface IUpdateDonation {
+	donationStatus: DonationStatus;
 }

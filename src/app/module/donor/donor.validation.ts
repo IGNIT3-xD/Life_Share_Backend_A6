@@ -1,5 +1,8 @@
 import z from "zod";
-import { BloodGroup } from "../../../../prisma/generated/prisma/enums";
+import {
+	BloodGroup,
+	DonationStatus,
+} from "../../../../prisma/generated/prisma/enums";
 
 const createDonorProfileValidate = z.object({
 	blood_group: z.enum(BloodGroup, "Blood group should be valid."),
@@ -28,6 +31,11 @@ const createDonorProfileValidate = z.object({
 	lastDonationDate: z.coerce.date().optional(),
 });
 
+const updateDonationRequestValidate = z.object({
+	donationStatus: z.enum(DonationStatus, "Donation status should be valid."),
+});
+
 export const DonorValidtaion = {
 	createDonorProfileValidate,
+	updateDonationRequestValidate,
 };

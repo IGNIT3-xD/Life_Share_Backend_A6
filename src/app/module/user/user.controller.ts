@@ -49,5 +49,4 @@ export const UserController = {
 	getMeController,
 	makeBloodRequestController,
 	getAllRequesterController,
-
 };
