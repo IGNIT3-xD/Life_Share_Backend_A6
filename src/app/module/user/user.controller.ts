@@ -33,7 +33,7 @@ const makeBloodRequestController = catchAsync(
 );
 
 const getAllRequesterController = catchAsync(
-	async (req: Request, res: Response) => {
+	async (_req: Request, res: Response) => {
 		const result = await UserService.getAllRequestersService();
 
 		sendResponse(res, {
@@ -45,8 +45,75 @@ const getAllRequesterController = catchAsync(
 	},
 );
 
+const getMyRequestController = catchAsync(
+	async (req: Request, res: Response) => {
+		const user = req.user as IUser
+
+		const result = await UserService.getMyRequestService(user);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "All requests retrieved successfully",
+			data: result,
+		});
+	},
+);
+
+const getMyRequestDetailsController = catchAsync(
+	async (req: Request, res: Response) => {
+		const user = req.user as IUser
+		const requster_id = req.params.id as string
+
+		const result = await UserService.getMyRequestDetailsService(user, requster_id);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "Requests details retrieved successfully",
+			data: result,
+		});
+	},
+);
+
+const updateMyRequestController = catchAsync(
+	async (req: Request, res: Response) => {
+		const user = req.user as IUser
+		const requster_id = req.params.id as string
+
+		const result = await UserService.updateMyRequestService(user, requster_id, req.body);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "Requests details updated successfully",
+			data: result,
+		});
+	},
+);
+
+const deleteMyRequestController = catchAsync(
+	async (req: Request, res: Response) => {
+		const user = req.user as IUser
+		const requster_id = req.params.id as string
+
+		const result = await UserService.deleteMyRequestService(user, requster_id);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "Requests deleted successfully",
+			data: result,
+		});
+	},
+);
+
 export const UserController = {
 	getMeController,
 	makeBloodRequestController,
 	getAllRequesterController,
+	getMyRequestController,
+	getMyRequestDetailsController,
+	updateMyRequestController,
+	deleteMyRequestController
 };

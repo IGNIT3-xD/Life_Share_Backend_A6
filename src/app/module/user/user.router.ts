@@ -22,4 +22,21 @@ userRouter.post(
 
 userRouter.get("/requester", UserController.getAllRequesterController);
 
+userRouter.get("/my-request", auth(Role.USER), UserController.getMyRequestController);
+
+userRouter.get("/my-request/:id", auth(Role.USER), UserController.getMyRequestDetailsController);
+
+userRouter.patch(
+	"/update-my-request/:id",
+	auth(Role.USER),
+	validateRequest(UserValidation.updateMyRequestValidationSchema),
+	UserController.updateMyRequestController
+);
+
+userRouter.delete(
+	"/delete-my-request/:id",
+	auth(Role.USER),
+	UserController.deleteMyRequestController
+);
+
 export default userRouter;

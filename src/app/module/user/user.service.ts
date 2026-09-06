@@ -2,7 +2,7 @@ import { isPast } from "date-fns";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import { validateUserById } from "../../utils/isUserExist";
-import type { IBloodRequester, IUser } from "./user.interface";
+import type { IBloodRequester, IRequestUpdate, IUser } from "./user.interface";
 
 const getMeService = async (user: IUser) => {
 	const userData = await prisma.user.findUnique({
@@ -57,8 +57,97 @@ const getAllRequestersService = async () => {
 	return requester;
 };
 
+const getMyRequestService = async (user: IUser) => {
+	const request = await prisma.requester.findMany({
+		where: {
+			user_id: user.userId
+		}
+	})
+
+	if (!request) {
+		throw new AppError(404, "No request record found.")
+	}
+
+	return request
+}
+
+const getMyRequestDetailsService = async (user: IUser, request_id: string) => {
+	const requestData = await prisma.requester.findUnique({
+		where: {
+			id: request_id
+		},
+		include: {
+			donations: true
+		}
+	})
+
+	if (!requestData) {
+		throw new AppError(404, "No request record found.")
+	}
+
+	if (requestData.user_id !== user.userId) {
+		throw new AppError(403, "Unauthorized access. You do not own this request record.")
+	}
+
+	return requestData
+}
+
+const updateMyRequestService = async (user: IUser, request_id: string, payload: IRequestUpdate) => {
+	const requestData = await prisma.requester.findUnique({
+		where: { id: request_id }
+	})
+
+	if (!requestData) {
+		throw new AppError(404, "No request record found.")
+	}
+
+	if (requestData.user_id !== user.userId) {
+		throw new AppError(403, "Unauthorized access. You do not own this request record.")
+	}
+
+	const updateRequesterDetails = await prisma.requester.update({
+		where: { id: request_id },
+		data: {
+			patientName: payload.patientName,
+			blood_group: payload.blood_group,
+			unit_required: payload.unit_required,
+			exact_location: payload.exact_location,
+			expires_at: payload.expires_at,
+			urgency: payload.urgency,
+			note: payload.note,
+			request_status: payload.request_status
+		}
+	})
+
+	return updateRequesterDetails
+}
+
+const deleteMyRequestService = async (user: IUser, request_id: string) => {
+	const requestData = await prisma.requester.findUnique({
+		where: { id: request_id }
+	})
+
+	if (!requestData) {
+		throw new AppError(404, "No request record found.")
+	}
+
+	if (requestData.user_id !== user.userId) {
+		throw new AppError(403, "Unauthorized access. You do not own this request record.")
+	}
+
+	await prisma.requester.delete({
+		where: { id: request_id }
+	})
+
+	return null
+}
+
 export const UserService = {
 	getMeService,
 	makeBloodRequestService,
 	getAllRequestersService,
+	getMyRequestService,
+	getMyRequestDetailsService,
+	updateMyRequestService,
+	deleteMyRequestService
 };
