@@ -1,6 +1,7 @@
 import z from "zod";
 import {
 	BloodGroup,
+	Gender,
 	RequestStatus,
 	RequestUrgency,
 } from "../../../../prisma/generated/prisma/enums";
@@ -51,7 +52,19 @@ const updateMyRequestValidationSchema = z.object({
 		.optional()
 });
 
+const updateUserValidation = z.object({
+	name: z
+		.string("Name must be characters")
+		.min(2, "Name must be at least 2 characters long.")
+		.max(15, "Name is too long")
+		.optional(),
+	phone: z.string().optional().optional(),
+	address: z.string().optional().optional(),
+	gender: z.enum(Gender, "Gender must be Male, Female or Others").optional(),
+});
+
 export const UserValidation = {
 	makeBloodRequestValidate,
-	updateMyRequestValidationSchema
+	updateMyRequestValidationSchema,
+	updateUserValidation
 };

@@ -108,6 +108,21 @@ const deleteMyRequestController = catchAsync(
 	},
 );
 
+const updateProfileController = catchAsync(
+	async (req: Request, res: Response) => {
+		const user = req.user as IUser
+
+		const result = await UserService.updateProfileService(user, req.body, req.file?.buffer);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "User profile updated successfully",
+			data: result,
+		});
+	},
+);
+
 export const UserController = {
 	getMeController,
 	makeBloodRequestController,
@@ -115,5 +130,6 @@ export const UserController = {
 	getMyRequestController,
 	getMyRequestDetailsController,
 	updateMyRequestController,
-	deleteMyRequestController
+	deleteMyRequestController,
+	updateProfileController
 };

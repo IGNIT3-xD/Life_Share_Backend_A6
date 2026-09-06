@@ -1,5 +1,6 @@
 import type {
 	BloodGroup,
+	Gender,
 	RequestStatus,
 	RequestUrgency,
 	Role,
@@ -33,4 +34,13 @@ export interface IRequestUpdate {
 	urgency?: RequestUrgency;
 	note?: string;
 	request_status?: Extract<RequestStatus, "PENDING" | "CANCELLED">
+}
+
+export interface IUpdateProfile {
+	name?: string;
+	phone?: string;
+	address?: string;
+	gender?: Gender;
+	profile_pic?: string;
+	profile_pic_public_id?: string;
 }

@@ -4,6 +4,7 @@ import { Role } from "../../../../prisma/generated/prisma/enums";
 import { UserController } from "./user.controller";
 import { validateRequest } from "../../middlewares/validateRequest";
 import { UserValidation } from "./user.validation";
+import { upload } from "../../lib/multer";
 
 const userRouter = Router();
 
@@ -37,6 +38,14 @@ userRouter.delete(
 	"/delete-my-request/:id",
 	auth(Role.USER),
 	UserController.deleteMyRequestController
+);
+
+userRouter.patch(
+	"/update-profile",
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
+	upload.single("profile_pic"),
+	validateRequest(UserValidation.updateUserValidation),
+	UserController.updateProfileController
 );
 
 export default userRouter;
