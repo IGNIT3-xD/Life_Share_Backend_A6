@@ -69,3 +69,9 @@ enum DonationStatus {
     DONOR_CANCELLED
     REJECTED
 }
+
+enum HospitalStatus {
+    VERIFIED
+    NOT_ELIGIBLE
+    IN_PROGRESS
+}

@@ -251,6 +251,23 @@ export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedIntNullableFilter<$PrismaModel>
 }
 
+export type EnumHospitalStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.HospitalStatus | Prisma.EnumHospitalStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.HospitalStatus[] | Prisma.ListEnumHospitalStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HospitalStatus[] | Prisma.ListEnumHospitalStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHospitalStatusFilter<$PrismaModel> | $Enums.HospitalStatus
+}
+
+export type EnumHospitalStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.HospitalStatus | Prisma.EnumHospitalStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.HospitalStatus[] | Prisma.ListEnumHospitalStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HospitalStatus[] | Prisma.ListEnumHospitalStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHospitalStatusWithAggregatesFilter<$PrismaModel> | $Enums.HospitalStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumHospitalStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumHospitalStatusFilter<$PrismaModel>
+}
+
 export type EnumRequestUrgencyFilter<$PrismaModel = never> = {
   equals?: $Enums.RequestUrgency | Prisma.EnumRequestUrgencyFieldRefInput<$PrismaModel>
   in?: $Enums.RequestUrgency[] | Prisma.ListEnumRequestUrgencyFieldRefInput<$PrismaModel>
@@ -649,6 +666,23 @@ export type NestedFloatNullableFilter<$PrismaModel = never> = {
   gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   not?: Prisma.NestedFloatNullableFilter<$PrismaModel> | number | null
+}
+
+export type NestedEnumHospitalStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.HospitalStatus | Prisma.EnumHospitalStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.HospitalStatus[] | Prisma.ListEnumHospitalStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HospitalStatus[] | Prisma.ListEnumHospitalStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHospitalStatusFilter<$PrismaModel> | $Enums.HospitalStatus
+}
+
+export type NestedEnumHospitalStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.HospitalStatus | Prisma.EnumHospitalStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.HospitalStatus[] | Prisma.ListEnumHospitalStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HospitalStatus[] | Prisma.ListEnumHospitalStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHospitalStatusWithAggregatesFilter<$PrismaModel> | $Enums.HospitalStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumHospitalStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumHospitalStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumRequestUrgencyFilter<$PrismaModel = never> = {

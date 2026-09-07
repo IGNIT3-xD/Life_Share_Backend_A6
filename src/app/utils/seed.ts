@@ -203,9 +203,18 @@ export const seedTesterHospital = async () => {
 				name,
 				email,
 				password: hashedPassword,
-				gender: Gender.MALE,
+				gender: Gender.OTHERS,
 				role: Role.HOSPITAL,
 				email_verified: true,
+				address: "Tester Hospital Address",
+				phone: "01xxxxxxx",
+				hospital: {
+					create: {
+						license_number: "TEST1234",
+						description: "This is tester hospital.",
+						hospital_status: 'VERIFIED'
+					}
+				}
 			},
 			omit: { password: true },
 		});

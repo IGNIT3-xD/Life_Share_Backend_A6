@@ -109,3 +109,12 @@ export const DonationStatus = {
 } as const
 
 export type DonationStatus = (typeof DonationStatus)[keyof typeof DonationStatus]
+
+
+export const HospitalStatus = {
+  VERIFIED: 'VERIFIED',
+  NOT_ELIGIBLE: 'NOT_ELIGIBLE',
+  IN_PROGRESS: 'IN_PROGRESS'
+} as const
+
+export type HospitalStatus = (typeof HospitalStatus)[keyof typeof HospitalStatus]

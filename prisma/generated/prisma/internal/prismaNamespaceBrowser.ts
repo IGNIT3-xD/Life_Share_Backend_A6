@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Donation: 'Donation',
   Donor: 'Donor',
+  Hospital: 'Hospital',
   Requester: 'Requester',
   User: 'User'
 } as const
@@ -105,6 +106,19 @@ export const DonorScalarFieldEnum = {
 } as const
 
 export type DonorScalarFieldEnum = (typeof DonorScalarFieldEnum)[keyof typeof DonorScalarFieldEnum]
+
+
+export const HospitalScalarFieldEnum = {
+  id: 'id',
+  license_number: 'license_number',
+  description: 'description',
+  hospital_status: 'hospital_status',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  user_id: 'user_id'
+} as const
+
+export type HospitalScalarFieldEnum = (typeof HospitalScalarFieldEnum)[keyof typeof HospitalScalarFieldEnum]
 
 
 export const RequesterScalarFieldEnum = {

@@ -5,7 +5,7 @@ const registerUserValidation = z.object({
 	name: z
 		.string("Name must be characters")
 		.min(2, "Name must be at least 2 characters long.")
-		.max(15, "Name is too long"),
+		.max(255, "Name is too long"),
 	email: z.email("Enter an email."),
 	password: z
 		.string()
@@ -20,17 +20,30 @@ const registerUserValidation = z.object({
 		),
 	phone: z.string().optional(),
 	address: z.string().optional(),
-	gender: z.enum(
-		[Gender.MALE, Gender.FEMALE, Gender.OTHERS],
-		"Gender must be Male, Female or Others",
-	),
+	gender: z.enum(Gender, "Gender must be Male, Female or Others"),
 	role: z
-		.enum(
-			[Role.USER, Role.DONOR, Role.HOSPITAL],
-			"Role must be User, Donor or Hospital.",
-		)
-		.optional(),
-});
+		.enum(Role, "Role must be User, Donor or Hospital.")
+		.optional()
+		.default(Role.USER),
+}).superRefine((data, ctx) => {
+	if (data.role === 'HOSPITAL') {
+		if (!data.phone || data.phone.trim() === "") {
+			ctx.addIssue({
+				code: "custom",
+				message: "Phone number is strictly required for Hospital registration profiles.",
+				path: ["phone"]
+			})
+		}
+
+		if (!data.address || data.address.trim() === "") {
+			ctx.addIssue({
+				code: "custom",
+				message: "Physical address is strictly required for Hospital registration profiles.",
+				path: ["address"],
+			});
+		}
+	}
+})
 
 const loginUserValidation = z.object({
 	email: z.email("Enter an email."),

@@ -10,6 +10,7 @@
  */
 export type * from './models/Donation'
 export type * from './models/Donor'
+export type * from './models/Hospital'
 export type * from './models/Requester'
 export type * from './models/User'
 export type * from './commonInputTypes'

@@ -6,6 +6,7 @@ import authRouter from "./app/module/auth/auth.router";
 import donorRouter from "./app/module/donor/donor.route";
 import userRouter from "./app/module/user/user.router";
 import donationRouter from "./app/module/donation/donation.router";
+import hospitalRouter from "./app/module/hospital/hospital.route";
 
 const app: Application = express();
 
@@ -24,6 +25,7 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/donor", donorRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/donation", donationRouter);
+app.use("/api/v1/hospital", hospitalRouter);
 
 app.use(globalErrorHandler);
 

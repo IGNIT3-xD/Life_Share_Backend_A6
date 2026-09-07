@@ -52,6 +52,11 @@ export type Donation = Prisma.DonationModel
  */
 export type Donor = Prisma.DonorModel
 /**
+ * Model Hospital
+ * 
+ */
+export type Hospital = Prisma.HospitalModel
+/**
  * Model Requester
  * 
  */
