@@ -16,4 +16,24 @@ serviceRouter.post(
     EmergencyServiceController.createServiceController,
 );
 
+serviceRouter.get("/", EmergencyServiceController.getAllServiceController);
+
+serviceRouter.get("/my-services", auth(Role.HOSPITAL), EmergencyServiceController.getMyServicesController);
+
+serviceRouter.get("/:id", EmergencyServiceController.getServiceDetailsController);
+
+serviceRouter.patch(
+    "/update-service/:id",
+    auth(Role.HOSPITAL),
+    upload.single("service_image"),
+    validateRequest(ServiceValidation.updateServiceValidate),
+    EmergencyServiceController.updateMyServicesController,
+);
+
+serviceRouter.delete(
+    "/my-service/:id",
+    auth(Role.HOSPITAL),
+    EmergencyServiceController.deleteMyServicesController,
+);
+
 export default serviceRouter

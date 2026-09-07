@@ -27,7 +27,7 @@ app.use("/api/v1/donor", donorRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/donation", donationRouter);
 app.use("/api/v1/hospital", hospitalRouter);
-app.use("/api/v1/service", serviceRouter);
+app.use("/api/v1/emergency-service", serviceRouter);
 
 app.use(globalErrorHandler);
 

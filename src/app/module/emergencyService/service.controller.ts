@@ -23,6 +23,72 @@ const createServiceController = catchAsync(async (req: Request, res: Response) =
     });
 })
 
+const getAllServiceController = catchAsync(async (_req: Request, res: Response) => {
+    const result = await EmergencyService.getAllService()
+
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Emergency services retrieved successfully",
+        data: result,
+    });
+})
+
+const getServiceDetailsController = catchAsync(async (req: Request, res: Response) => {
+    const result = await EmergencyService.getServiceDetails(req.params.id as string)
+
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Emergency service details retrieved successfully",
+        data: result,
+    });
+})
+
+const getMyServicesController = catchAsync(async (req: Request, res: Response) => {
+    const user = req.user as IUser
+    const result = await EmergencyService.getMyServices(user)
+
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "My Emergency services retrieved successfully",
+        data: result,
+    });
+})
+
+const updateMyServicesController = catchAsync(async (req: Request, res: Response) => {
+    const user = req.user as IUser
+    const id = req.params.id as string
+
+    const result = await EmergencyService.updateMyService(user, id, req.body, req.file?.buffer)
+
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Emergency service updated successfully",
+        data: result,
+    });
+})
+
+const deleteMyServicesController = catchAsync(async (req: Request, res: Response) => {
+    const user = req.user as IUser
+    const id = req.params.id as string
+
+    await EmergencyService.deleteMyService(user, id)
+
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Emergency service deleted successfully"
+    });
+})
+
 export const EmergencyServiceController = {
-    createServiceController
+    createServiceController,
+    getAllServiceController,
+    getServiceDetailsController,
+    getMyServicesController,
+    updateMyServicesController,
+    deleteMyServicesController
 }
