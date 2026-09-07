@@ -23,21 +23,29 @@ userRouter.post(
 
 userRouter.get("/requester", UserController.getAllRequesterController);
 
-userRouter.get("/my-request", auth(Role.USER), UserController.getMyRequestController);
+userRouter.get(
+	"/my-request",
+	auth(Role.USER),
+	UserController.getMyRequestController,
+);
 
-userRouter.get("/my-request/:id", auth(Role.USER), UserController.getMyRequestDetailsController);
+userRouter.get(
+	"/my-request/:id",
+	auth(Role.USER),
+	UserController.getMyRequestDetailsController,
+);
 
 userRouter.patch(
 	"/update-my-request/:id",
 	auth(Role.USER),
 	validateRequest(UserValidation.updateMyRequestValidationSchema),
-	UserController.updateMyRequestController
+	UserController.updateMyRequestController,
 );
 
 userRouter.delete(
 	"/delete-my-request/:id",
 	auth(Role.USER),
-	UserController.deleteMyRequestController
+	UserController.deleteMyRequestController,
 );
 
 userRouter.patch(
@@ -45,7 +53,7 @@ userRouter.patch(
 	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
 	upload.single("profile_pic"),
 	validateRequest(UserValidation.updateUserValidation),
-	UserController.updateProfileController
+	UserController.updateProfileController,
 );
 
 export default userRouter;

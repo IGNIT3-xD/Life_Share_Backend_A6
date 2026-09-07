@@ -87,7 +87,7 @@ const updateDonationRequestController = catchAsync(
 
 const getDonorProfileController = catchAsync(
 	async (req: Request, res: Response) => {
-		const donor_id = req.params.id as string
+		const donor_id = req.params.id as string;
 
 		const result = await DonorService.getDonorProfileService(donor_id);
 
@@ -97,7 +97,7 @@ const getDonorProfileController = catchAsync(
 			message: "Donor profile retrieved successfully",
 			data: result,
 		});
-	}
+	},
 );
 
 const updateDonorProfileController = catchAsync(
@@ -112,7 +112,7 @@ const updateDonorProfileController = catchAsync(
 			message: "Donor profile updated successfully",
 			data: result,
 		});
-	}
+	},
 );
 
 const getDonorRequestController = catchAsync(
@@ -127,7 +127,7 @@ const getDonorRequestController = catchAsync(
 			message: "Donor requesters retrieved successfully",
 			data: result,
 		});
-	}
+	},
 );
 
 export const DonorController = {
@@ -138,5 +138,5 @@ export const DonorController = {
 	updateDonationRequestController,
 	getDonorProfileController,
 	updateDonorProfileController,
-	getDonorRequestController
+	getDonorRequestController,
 };

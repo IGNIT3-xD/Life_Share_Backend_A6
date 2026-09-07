@@ -2,9 +2,14 @@ import { isPast } from "date-fns";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import { validateUserById } from "../../utils/isUserExist";
-import type { IBloodRequester, IRequestUpdate, IUpdateProfile, IUser } from "./user.interface";
+import type {
+	IBloodRequester,
+	IRequestUpdate,
+	IUpdateProfile,
+	IUser,
+} from "./user.interface";
 import cloudinary from "../../lib/cloudinary";
-import { UploadApiResponse } from "cloudinary";
+import type { UploadApiResponse } from "cloudinary";
 
 const getMeService = async (user: IUser) => {
 	const userData = await prisma.user.findUnique({
@@ -62,49 +67,59 @@ const getAllRequestersService = async () => {
 const getMyRequestService = async (user: IUser) => {
 	const request = await prisma.requester.findMany({
 		where: {
-			user_id: user.userId
-		}
-	})
+			user_id: user.userId,
+		},
+	});
 
 	if (!request) {
-		throw new AppError(404, "No request record found.")
+		throw new AppError(404, "No request record found.");
 	}
 
-	return request
-}
+	return request;
+};
 
 const getMyRequestDetailsService = async (user: IUser, request_id: string) => {
 	const requestData = await prisma.requester.findUnique({
 		where: {
-			id: request_id
+			id: request_id,
 		},
 		include: {
-			donations: true
-		}
-	})
+			donations: true,
+		},
+	});
 
 	if (!requestData) {
-		throw new AppError(404, "No request record found.")
+		throw new AppError(404, "No request record found.");
 	}
 
 	if (requestData.user_id !== user.userId) {
-		throw new AppError(403, "Unauthorized access. You do not own this request record.")
+		throw new AppError(
+			403,
+			"Unauthorized access. You do not own this request record.",
+		);
 	}
 
-	return requestData
-}
+	return requestData;
+};
 
-const updateMyRequestService = async (user: IUser, request_id: string, payload: IRequestUpdate) => {
+const updateMyRequestService = async (
+	user: IUser,
+	request_id: string,
+	payload: IRequestUpdate,
+) => {
 	const requestData = await prisma.requester.findUnique({
-		where: { id: request_id }
-	})
+		where: { id: request_id },
+	});
 
 	if (!requestData) {
-		throw new AppError(404, "No request record found.")
+		throw new AppError(404, "No request record found.");
 	}
 
 	if (requestData.user_id !== user.userId) {
-		throw new AppError(403, "Unauthorized access. You do not own this request record.")
+		throw new AppError(
+			403,
+			"Unauthorized access. You do not own this request record.",
+		);
 	}
 
 	const updateRequesterDetails = await prisma.requester.update({
@@ -117,36 +132,43 @@ const updateMyRequestService = async (user: IUser, request_id: string, payload: 
 			expires_at: payload.expires_at,
 			urgency: payload.urgency,
 			note: payload.note,
-			request_status: payload.request_status
-		}
-	})
+			request_status: payload.request_status,
+		},
+	});
 
-	return updateRequesterDetails
-}
+	return updateRequesterDetails;
+};
 
 const deleteMyRequestService = async (user: IUser, request_id: string) => {
 	const requestData = await prisma.requester.findUnique({
-		where: { id: request_id }
-	})
+		where: { id: request_id },
+	});
 
 	if (!requestData) {
-		throw new AppError(404, "No request record found.")
+		throw new AppError(404, "No request record found.");
 	}
 
 	if (requestData.user_id !== user.userId) {
-		throw new AppError(403, "Unauthorized access. You do not own this request record.")
+		throw new AppError(
+			403,
+			"Unauthorized access. You do not own this request record.",
+		);
 	}
 
 	await prisma.requester.delete({
-		where: { id: request_id }
-	})
+		where: { id: request_id },
+	});
 
-	return null
-}
+	return null;
+};
 
-const updateProfileService = async (user: IUser, payload: IUpdateProfile, buffer?: Buffer) => {
+const updateProfileService = async (
+	user: IUser,
+	payload: IUpdateProfile,
+	buffer?: Buffer,
+) => {
 	const userData = await prisma.user.findUnique({
-		where: { email: user.email }
+		where: { email: user.email },
 	});
 
 	if (!userData) {
@@ -161,48 +183,55 @@ const updateProfileService = async (user: IUser, payload: IUpdateProfile, buffer
 	};
 
 	if (buffer) {
-		const uploadResult = await new Promise<UploadApiResponse>((resolve, reject) => {
-			cloudinary.uploader.upload_stream(
-				{
-					resource_type: 'image'
-				},
-				(err, result) => {
-					if (err) {
-						return reject(err)
-					}
+		const uploadResult = await new Promise<UploadApiResponse>(
+			(resolve, reject) => {
+				cloudinary.uploader
+					.upload_stream(
+						{
+							resource_type: "image",
+						},
+						(err, result) => {
+							if (err) {
+								return reject(err);
+							}
 
-					if (!result) {
-						return reject(new AppError(400, "Cloudinary upload failed."))
-					}
+							if (!result) {
+								return reject(new AppError(400, "Cloudinary upload failed."));
+							}
 
-					resolve(result)
-				}
-			).end(buffer)
-		})
+							resolve(result);
+						},
+					)
+					.end(buffer);
+			},
+		);
 
 		// Append the new image properties to the dynamic database payload
-		updateData.profile_pic = uploadResult.secure_url
-		updateData.profile_pic_public_id = uploadResult.public_id
+		updateData.profile_pic = uploadResult.secure_url;
+		updateData.profile_pic_public_id = uploadResult.public_id;
 	}
 
 	const updateProfile = await prisma.user.update({
 		where: {
-			id: user.userId
+			id: user.userId,
 		},
 		data: updateData,
-		omit: { password: true }
-	})
+		omit: { password: true },
+	});
 
 	if (buffer && userData.profile_pic_public_id) {
 		try {
 			await cloudinary.uploader.destroy(userData.profile_pic_public_id);
 		} catch (error) {
-			throw new AppError(400, `Failed to delete old profile image from Cloudinary: ${error}`);
+			throw new AppError(
+				400,
+				`Failed to delete old profile image from Cloudinary: ${error}`,
+			);
 		}
 	}
 
-	return updateProfile
-}
+	return updateProfile;
+};
 
 export const UserService = {
 	getMeService,
@@ -212,5 +241,5 @@ export const UserService = {
 	getMyRequestDetailsService,
 	updateMyRequestService,
 	deleteMyRequestService,
-	updateProfileService
+	updateProfileService,
 };

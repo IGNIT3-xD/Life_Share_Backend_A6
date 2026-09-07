@@ -59,11 +59,11 @@ const updateDonorProfileValidate = z.object({
 		.positive("Height must be greater than 0")
 		.max(300, "Invalid height")
 		.optional(),
-	availability: z.enum(DonorAvailability).optional()
+	availability: z.enum(DonorAvailability).optional(),
 });
 
 export const DonorValidtaion = {
 	createDonorProfileValidate,
 	updateDonationRequestValidate,
-	updateDonorProfileValidate
+	updateDonorProfileValidate,
 };

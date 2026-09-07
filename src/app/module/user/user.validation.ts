@@ -48,8 +48,11 @@ const updateMyRequestValidationSchema = z.object({
 	urgency: z.enum(RequestUrgency, "Urgency should be valid.").optional(),
 	note: z.string().max(1000, "Note is too long").optional(),
 	request_status: z
-		.enum([RequestStatus.PENDING, RequestStatus.CANCELLED], "You can only Cancel or Pendin request status")
-		.optional()
+		.enum(
+			[RequestStatus.PENDING, RequestStatus.CANCELLED],
+			"You can only Cancel or Pendin request status",
+		)
+		.optional(),
 });
 
 const updateUserValidation = z.object({
@@ -66,5 +69,5 @@ const updateUserValidation = z.object({
 export const UserValidation = {
 	makeBloodRequestValidate,
 	updateMyRequestValidationSchema,
-	updateUserValidation
+	updateUserValidation,
 };

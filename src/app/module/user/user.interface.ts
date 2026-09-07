@@ -33,7 +33,7 @@ export interface IRequestUpdate {
 	expires_at?: Date;
 	urgency?: RequestUrgency;
 	note?: string;
-	request_status?: Extract<RequestStatus, "PENDING" | "CANCELLED">
+	request_status?: Extract<RequestStatus, "PENDING" | "CANCELLED">;
 }
 
 export interface IUpdateProfile {

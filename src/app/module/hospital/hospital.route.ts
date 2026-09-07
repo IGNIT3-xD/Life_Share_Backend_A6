@@ -8,10 +8,23 @@ import { HospitalValidation } from "./hospital.validation";
 const hospitalRouter = Router();
 
 hospitalRouter.post(
-    "/create-hospital-profile",
-    auth(Role.HOSPITAL),
-    validateRequest(HospitalValidation.createHospitalProfileValidate),
-    HospitalController.createHospitalProfileController,
+	"/create-hospital-profile",
+	auth(Role.HOSPITAL),
+	validateRequest(HospitalValidation.createHospitalProfileValidate),
+	HospitalController.createHospitalProfileController,
 );
 
-export default hospitalRouter
+hospitalRouter.get(
+	"/my-hospital-profile",
+	auth(Role.HOSPITAL),
+	HospitalController.getMyHospitalProfileController,
+);
+
+hospitalRouter.patch(
+	"/update-hospital-profile",
+	auth(Role.HOSPITAL),
+	validateRequest(HospitalValidation.updateHospitalProfileValidate),
+	HospitalController.updateHospitalProfileController,
+);
+
+export default hospitalRouter;

@@ -212,9 +212,9 @@ export const seedTesterHospital = async () => {
 					create: {
 						license_number: "TEST1234",
 						description: "This is tester hospital.",
-						hospital_status: 'VERIFIED'
-					}
-				}
+						hospital_status: "VERIFIED",
+					},
+				},
 			},
 			omit: { password: true },
 		});

@@ -188,65 +188,68 @@ const getDonorProfileService = async (donor_id: string) => {
 					name: true,
 					gender: true,
 					phone: true,
-					profile_pic: true
-				}
-			}
-		}
-	})
+					profile_pic: true,
+				},
+			},
+		},
+	});
 
 	if (!donor) {
-		throw new AppError(404, "Donor profile not found.")
+		throw new AppError(404, "Donor profile not found.");
 	}
 
-	return donor
+	return donor;
 };
 
-const updateDonorProfileService = async (user: IUser, payload: IUpdateDonor) => {
+const updateDonorProfileService = async (
+	user: IUser,
+	payload: IUpdateDonor,
+) => {
 	const donor = await prisma.donor.findUnique({
-		where: { userId: user.userId }
-	})
+		where: { userId: user.userId },
+	});
 
 	if (!donor) {
-		throw new AppError(404, "Donor profile not found.")
+		throw new AppError(404, "Donor profile not found.");
 	}
 
 	const updateDonorProfile = await prisma.donor.update({
 		where: {
-			userId: user.userId
+			userId: user.userId,
 		},
 		data: {
 			blood_group: payload.blood_group,
 			age: payload.age,
 			availability: payload.availability,
 			weightKg: payload.weightKg,
-			height: payload.height
-		}
-	})
+			height: payload.height,
+		},
+	});
 
-	return updateDonorProfile
+	return updateDonorProfile;
 };
 
 const getDonorRequestService = async (user: IUser) => {
 	const donor = await prisma.donor.findUnique({
-		where: { userId: user.userId }
-	})
+		where: { userId: user.userId },
+	});
 
 	if (!donor) {
-		throw new AppError(404, "Donor not found found.")
+		throw new AppError(404, "Donor not found found.");
 	}
 
 	const donations = await prisma.donation.findMany({
 		where: {
-			donor_id: donor.id
-		}
-	})
+			donor_id: donor.id,
+		},
+	});
 
 	if (!donations) {
-		throw new AppError(404, "No donation request found.")
+		throw new AppError(404, "No donation request found.");
 	}
 
-	return donations
-}
+	return donations;
+};
 
 export const DonorService = {
 	createDonorProfileService,
@@ -256,5 +259,5 @@ export const DonorService = {
 	updateDonationRequestService,
 	getDonorProfileService,
 	updateDonorProfileService,
-	getDonorRequestService
+	getDonorRequestService,
 };

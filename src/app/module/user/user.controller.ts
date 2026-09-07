@@ -47,7 +47,7 @@ const getAllRequesterController = catchAsync(
 
 const getMyRequestController = catchAsync(
 	async (req: Request, res: Response) => {
-		const user = req.user as IUser
+		const user = req.user as IUser;
 
 		const result = await UserService.getMyRequestService(user);
 
@@ -62,10 +62,13 @@ const getMyRequestController = catchAsync(
 
 const getMyRequestDetailsController = catchAsync(
 	async (req: Request, res: Response) => {
-		const user = req.user as IUser
-		const requster_id = req.params.id as string
+		const user = req.user as IUser;
+		const requster_id = req.params.id as string;
 
-		const result = await UserService.getMyRequestDetailsService(user, requster_id);
+		const result = await UserService.getMyRequestDetailsService(
+			user,
+			requster_id,
+		);
 
 		sendResponse(res, {
 			statusCode: 200,
@@ -78,10 +81,14 @@ const getMyRequestDetailsController = catchAsync(
 
 const updateMyRequestController = catchAsync(
 	async (req: Request, res: Response) => {
-		const user = req.user as IUser
-		const requster_id = req.params.id as string
+		const user = req.user as IUser;
+		const requster_id = req.params.id as string;
 
-		const result = await UserService.updateMyRequestService(user, requster_id, req.body);
+		const result = await UserService.updateMyRequestService(
+			user,
+			requster_id,
+			req.body,
+		);
 
 		sendResponse(res, {
 			statusCode: 200,
@@ -94,8 +101,8 @@ const updateMyRequestController = catchAsync(
 
 const deleteMyRequestController = catchAsync(
 	async (req: Request, res: Response) => {
-		const user = req.user as IUser
-		const requster_id = req.params.id as string
+		const user = req.user as IUser;
+		const requster_id = req.params.id as string;
 
 		const result = await UserService.deleteMyRequestService(user, requster_id);
 
@@ -110,9 +117,13 @@ const deleteMyRequestController = catchAsync(
 
 const updateProfileController = catchAsync(
 	async (req: Request, res: Response) => {
-		const user = req.user as IUser
+		const user = req.user as IUser;
 
-		const result = await UserService.updateProfileService(user, req.body, req.file?.buffer);
+		const result = await UserService.updateProfileService(
+			user,
+			req.body,
+			req.file?.buffer,
+		);
 
 		sendResponse(res, {
 			statusCode: 200,
@@ -131,5 +142,5 @@ export const UserController = {
 	getMyRequestDetailsController,
 	updateMyRequestController,
 	deleteMyRequestController,
-	updateProfileController
+	updateProfileController,
 };
