@@ -1,7 +1,7 @@
 import { HospitalStatus } from "../../../../prisma/generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
-import { isUserExist } from "../../utils/isUserExist";
+import { validateUserById } from "../../utils/isUserExist";
 import type { IUser } from "../user/user.interface";
 import type {
 	HospitalProfile,
@@ -76,7 +76,7 @@ const updateHospitalProfileService = async (
 		throw new AppError(404, "Hospital profile is not exist.");
 	}
 
-	const userData = await isUserExist(user.email);
+	const userData = await validateUserById(user.userId);
 
 	const updateProfile = await prisma.hospital.update({
 		where: {

@@ -118,3 +118,46 @@ export const HospitalStatus = {
 } as const
 
 export type HospitalStatus = (typeof HospitalStatus)[keyof typeof HospitalStatus]
+
+
+export const ServiceStatus = {
+  IN_PROGRESS: 'IN_PROGRESS',
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE'
+} as const
+
+export type ServiceStatus = (typeof ServiceStatus)[keyof typeof ServiceStatus]
+
+
+export const ServiceCategory = {
+  VETERINARY: 'VETERINARY',
+  EMERGENCY_AMBULANCE: 'EMERGENCY_AMBULANCE',
+  BLOOD_BANK: 'BLOOD_BANK',
+  LAB_TEST: 'LAB_TEST',
+  PHARMACY: 'PHARMACY',
+  OTHER: 'OTHER'
+} as const
+
+export type ServiceCategory = (typeof ServiceCategory)[keyof typeof ServiceCategory]
+
+
+export const BookingStatus = {
+  PENDING: 'PENDING',
+  CONFIRMED: 'CONFIRMED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+  FAILED: 'FAILED'
+} as const
+
+export type BookingStatus = (typeof BookingStatus)[keyof typeof BookingStatus]
+
+
+export const PaymentStatus = {
+  PENDING: 'PENDING',
+  PAID: 'PAID',
+  FAILED: 'FAILED',
+  REFUNDED: 'REFUNDED'
+} as const
+
+export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]

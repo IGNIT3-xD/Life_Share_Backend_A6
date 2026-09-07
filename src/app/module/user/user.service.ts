@@ -59,7 +59,11 @@ const makeBloodRequestService = async (
 };
 
 const getAllRequestersService = async () => {
-	const requester = await prisma.requester.findMany();
+	const requester = await prisma.requester.findMany({
+		where: {
+			verificationStatus: 'VERIFIED'
+		}
+	});
 
 	return requester;
 };

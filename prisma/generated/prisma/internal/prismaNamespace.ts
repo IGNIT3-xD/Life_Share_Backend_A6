@@ -397,8 +397,10 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 
 export const ModelName = {
+  BookingService: 'BookingService',
   Donation: 'Donation',
   Donor: 'Donor',
+  EmergencyService: 'EmergencyService',
   Hospital: 'Hospital',
   Requester: 'Requester',
   User: 'User'
@@ -417,10 +419,84 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "donation" | "donor" | "hospital" | "requester" | "user"
+    modelProps: "bookingService" | "donation" | "donor" | "emergencyService" | "hospital" | "requester" | "user"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
+    BookingService: {
+      payload: Prisma.$BookingServicePayload<ExtArgs>
+      fields: Prisma.BookingServiceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BookingServiceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingServicePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BookingServiceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingServicePayload>
+        }
+        findFirst: {
+          args: Prisma.BookingServiceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingServicePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BookingServiceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingServicePayload>
+        }
+        findMany: {
+          args: Prisma.BookingServiceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingServicePayload>[]
+        }
+        create: {
+          args: Prisma.BookingServiceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingServicePayload>
+        }
+        createMany: {
+          args: Prisma.BookingServiceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BookingServiceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingServicePayload>[]
+        }
+        delete: {
+          args: Prisma.BookingServiceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingServicePayload>
+        }
+        update: {
+          args: Prisma.BookingServiceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingServicePayload>
+        }
+        deleteMany: {
+          args: Prisma.BookingServiceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BookingServiceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BookingServiceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingServicePayload>[]
+        }
+        upsert: {
+          args: Prisma.BookingServiceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingServicePayload>
+        }
+        aggregate: {
+          args: Prisma.BookingServiceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBookingService>
+        }
+        groupBy: {
+          args: Prisma.BookingServiceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BookingServiceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BookingServiceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BookingServiceCountAggregateOutputType> | number
+        }
+      }
+    }
     Donation: {
       payload: Prisma.$DonationPayload<ExtArgs>
       fields: Prisma.DonationFieldRefs
@@ -566,6 +642,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.DonorCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.DonorCountAggregateOutputType> | number
+        }
+      }
+    }
+    EmergencyService: {
+      payload: Prisma.$EmergencyServicePayload<ExtArgs>
+      fields: Prisma.EmergencyServiceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EmergencyServiceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmergencyServicePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EmergencyServiceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmergencyServicePayload>
+        }
+        findFirst: {
+          args: Prisma.EmergencyServiceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmergencyServicePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EmergencyServiceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmergencyServicePayload>
+        }
+        findMany: {
+          args: Prisma.EmergencyServiceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmergencyServicePayload>[]
+        }
+        create: {
+          args: Prisma.EmergencyServiceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmergencyServicePayload>
+        }
+        createMany: {
+          args: Prisma.EmergencyServiceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EmergencyServiceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmergencyServicePayload>[]
+        }
+        delete: {
+          args: Prisma.EmergencyServiceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmergencyServicePayload>
+        }
+        update: {
+          args: Prisma.EmergencyServiceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmergencyServicePayload>
+        }
+        deleteMany: {
+          args: Prisma.EmergencyServiceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EmergencyServiceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EmergencyServiceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmergencyServicePayload>[]
+        }
+        upsert: {
+          args: Prisma.EmergencyServiceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmergencyServicePayload>
+        }
+        aggregate: {
+          args: Prisma.EmergencyServiceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEmergencyService>
+        }
+        groupBy: {
+          args: Prisma.EmergencyServiceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmergencyServiceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EmergencyServiceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmergencyServiceCountAggregateOutputType> | number
         }
       }
     }
@@ -830,6 +980,26 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
+export const BookingServiceScalarFieldEnum = {
+  id: 'id',
+  booking_status: 'booking_status',
+  payment_status: 'payment_status',
+  payment_amount: 'payment_amount',
+  emergency_location: 'emergency_location',
+  description: 'description',
+  patient_name: 'patient_name',
+  patient_number: 'patient_number',
+  scheduled_at: 'scheduled_at',
+  completed_at: 'completed_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  user_id: 'user_id',
+  emergencyService_id: 'emergencyService_id'
+} as const
+
+export type BookingServiceScalarFieldEnum = (typeof BookingServiceScalarFieldEnum)[keyof typeof BookingServiceScalarFieldEnum]
+
+
 export const DonationScalarFieldEnum = {
   id: 'id',
   requester_id: 'requester_id',
@@ -862,6 +1032,24 @@ export const DonorScalarFieldEnum = {
 } as const
 
 export type DonorScalarFieldEnum = (typeof DonorScalarFieldEnum)[keyof typeof DonorScalarFieldEnum]
+
+
+export const EmergencyServiceScalarFieldEnum = {
+  id: 'id',
+  service_name: 'service_name',
+  service_category: 'service_category',
+  service_status: 'service_status',
+  description: 'description',
+  price: 'price',
+  service_image: 'service_image',
+  service_image_public_id: 'service_image_public_id',
+  availability: 'availability',
+  hospital_id: 'hospital_id',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type EmergencyServiceScalarFieldEnum = (typeof EmergencyServiceScalarFieldEnum)[keyof typeof EmergencyServiceScalarFieldEnum]
 
 
 export const HospitalScalarFieldEnum = {
@@ -963,16 +1151,44 @@ export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
 
 
 /**
- * Reference to a field of type 'DonationStatus'
+ * Reference to a field of type 'BookingStatus'
  */
-export type EnumDonationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DonationStatus'>
+export type EnumBookingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BookingStatus'>
     
 
 
 /**
- * Reference to a field of type 'DonationStatus[]'
+ * Reference to a field of type 'BookingStatus[]'
  */
-export type ListEnumDonationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DonationStatus[]'>
+export type ListEnumBookingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BookingStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PaymentStatus'
+ */
+export type EnumPaymentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'PaymentStatus[]'
+ */
+export type ListEnumPaymentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal'
+ */
+export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal[]'
+ */
+export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
     
 
 
@@ -987,6 +1203,20 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DonationStatus'
+ */
+export type EnumDonationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DonationStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'DonationStatus[]'
+ */
+export type ListEnumDonationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DonationStatus[]'>
     
 
 
@@ -1033,20 +1263,6 @@ export type ListEnumDonorAvailabilityFieldRefInput<$PrismaModel> = FieldRefInput
 
 
 /**
- * Reference to a field of type 'Decimal'
- */
-export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
-    
-
-
-/**
- * Reference to a field of type 'Decimal[]'
- */
-export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
-    
-
-
-/**
  * Reference to a field of type 'DonorStatus'
  */
 export type EnumDonorStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DonorStatus'>
@@ -1057,6 +1273,34 @@ export type EnumDonorStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pris
  * Reference to a field of type 'DonorStatus[]'
  */
 export type ListEnumDonorStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DonorStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ServiceCategory'
+ */
+export type EnumServiceCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceCategory'>
+    
+
+
+/**
+ * Reference to a field of type 'ServiceCategory[]'
+ */
+export type ListEnumServiceCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceCategory[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ServiceStatus'
+ */
+export type EnumServiceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ServiceStatus[]'
+ */
+export type ListEnumServiceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceStatus[]'>
     
 
 
@@ -1329,8 +1573,10 @@ export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions 
  */
 export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
+  bookingService?: Prisma.BookingServiceOmit
   donation?: Prisma.DonationOmit
   donor?: Prisma.DonorOmit
+  emergencyService?: Prisma.EmergencyServiceOmit
   hospital?: Prisma.HospitalOmit
   requester?: Prisma.RequesterOmit
   user?: Prisma.UserOmit

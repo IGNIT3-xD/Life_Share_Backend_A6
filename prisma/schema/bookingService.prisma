@@ -1,0 +1,28 @@
+model BookingService {
+    id String @id @default(uuid())
+
+    booking_status BookingStatus @default(IN_PROGRESS)
+    payment_status PaymentStatus @default(PENDING)
+
+    payment_amount     Decimal @db.Decimal(10, 2)
+    emergency_location String
+
+    description    String
+    patient_name   String
+    patient_number String
+
+    scheduled_at String
+    completed_at DateTime?
+
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+
+    user_id String
+    user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+    emergencyService_id String
+    emergencyService    EmergencyService @relation(fields: [emergencyService_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+    @@index([booking_status, payment_status, payment_amount], name: "idx_bookings_service")
+    @@map("bookingServices")
+}

@@ -8,8 +8,10 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/BookingService'
 export type * from './models/Donation'
 export type * from './models/Donor'
+export type * from './models/EmergencyService'
 export type * from './models/Hospital'
 export type * from './models/Requester'
 export type * from './models/User'

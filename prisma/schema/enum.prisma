@@ -75,3 +75,34 @@ enum HospitalStatus {
     NOT_ELIGIBLE
     IN_PROGRESS
 }
+
+enum ServiceStatus {
+    IN_PROGRESS
+    ACTIVE
+    INACTIVE
+}
+
+enum ServiceCategory {
+    VETERINARY
+    EMERGENCY_AMBULANCE
+    BLOOD_BANK
+    LAB_TEST
+    PHARMACY
+    OTHER
+}
+
+enum BookingStatus {
+    PENDING
+    CONFIRMED
+    IN_PROGRESS
+    COMPLETED
+    CANCELLED
+    FAILED
+}
+
+enum PaymentStatus {
+    PENDING
+    PAID
+    FAILED
+    REFUNDED
+}

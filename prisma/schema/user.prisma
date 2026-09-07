@@ -20,9 +20,10 @@ model User {
     created_at DateTime @default(now())
     updated_at DateTime @updatedAt
 
-    donor      Donor?
-    hospital   Hospital?
-    requesters Requester[]
+    donor           Donor?
+    hospital        Hospital?
+    requesters      Requester[]
+    bookingServices BookingService[]
 
     @@map("users")
 }

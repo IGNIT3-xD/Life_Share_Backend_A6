@@ -1,0 +1,23 @@
+model EmergencyService {
+    id String @id @default(uuid())
+
+    service_name            String
+    service_category        ServiceCategory
+    service_status          ServiceStatus   @default(IN_PROGRESS)
+    description             String
+    price                   Decimal         @db.Decimal(10, 2)
+    service_image           String
+    service_image_public_id String
+    availability            String
+
+    hospital_id String
+    hospital    Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+
+    bookingServices BookingService[]
+
+    @@index([service_category, service_status, price], name: "idx_emergency_service")
+    @@map("emergencyServices")
+}

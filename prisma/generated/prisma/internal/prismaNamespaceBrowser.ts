@@ -51,8 +51,10 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
+  BookingService: 'BookingService',
   Donation: 'Donation',
   Donor: 'Donor',
+  EmergencyService: 'EmergencyService',
   Hospital: 'Hospital',
   Requester: 'Requester',
   User: 'User'
@@ -72,6 +74,26 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const BookingServiceScalarFieldEnum = {
+  id: 'id',
+  booking_status: 'booking_status',
+  payment_status: 'payment_status',
+  payment_amount: 'payment_amount',
+  emergency_location: 'emergency_location',
+  description: 'description',
+  patient_name: 'patient_name',
+  patient_number: 'patient_number',
+  scheduled_at: 'scheduled_at',
+  completed_at: 'completed_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  user_id: 'user_id',
+  emergencyService_id: 'emergencyService_id'
+} as const
+
+export type BookingServiceScalarFieldEnum = (typeof BookingServiceScalarFieldEnum)[keyof typeof BookingServiceScalarFieldEnum]
 
 
 export const DonationScalarFieldEnum = {
@@ -106,6 +128,24 @@ export const DonorScalarFieldEnum = {
 } as const
 
 export type DonorScalarFieldEnum = (typeof DonorScalarFieldEnum)[keyof typeof DonorScalarFieldEnum]
+
+
+export const EmergencyServiceScalarFieldEnum = {
+  id: 'id',
+  service_name: 'service_name',
+  service_category: 'service_category',
+  service_status: 'service_status',
+  description: 'description',
+  price: 'price',
+  service_image: 'service_image',
+  service_image_public_id: 'service_image_public_id',
+  availability: 'availability',
+  hospital_id: 'hospital_id',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type EmergencyServiceScalarFieldEnum = (typeof EmergencyServiceScalarFieldEnum)[keyof typeof EmergencyServiceScalarFieldEnum]
 
 
 export const HospitalScalarFieldEnum = {
