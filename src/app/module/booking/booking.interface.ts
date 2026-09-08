@@ -1,15 +1,34 @@
-import type { PaymentVia } from "../../../../prisma/generated/prisma/enums";
+import type {
+	BookingStatus,
+	PaymentVia,
+} from "../../../../prisma/generated/prisma/enums";
 
 export interface IBooking {
-    payment_via: PaymentVia;
+	payment_via: PaymentVia;
 
-    emergency_location: string;
+	emergency_location: string;
 
-    description: string;
-    patient_name: string;
-    patient_number: string;
+	description: string;
+	patient_name: string;
+	patient_number: string;
 
-    note?: string;
+	note?: string;
 
-    scheduled_at: Date;
+	scheduled_at: Date;
+}
+
+export interface IUpdateBooking {
+	emergency_location?: string;
+
+	description?: string;
+	patient_name?: string;
+	patient_number?: string;
+
+	note?: string;
+
+	scheduled_at?: Date;
+}
+
+export interface IUpdateBookingStatus {
+	booking_status: BookingStatus;
 }
