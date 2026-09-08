@@ -56,6 +56,7 @@ export const ModelName = {
   Donor: 'Donor',
   EmergencyService: 'EmergencyService',
   Hospital: 'Hospital',
+  Payment: 'Payment',
   Requester: 'Requester',
   User: 'User'
 } as const
@@ -164,6 +165,31 @@ export const HospitalScalarFieldEnum = {
 export type HospitalScalarFieldEnum = (typeof HospitalScalarFieldEnum)[keyof typeof HospitalScalarFieldEnum]
 
 
+export const PaymentScalarFieldEnum = {
+  id: 'id',
+  payment_status: 'payment_status',
+  payment_amount: 'payment_amount',
+  currency: 'currency',
+  payment_gateway: 'payment_gateway',
+  merchant_invoice_number: 'merchant_invoice_number',
+  payer_reference: 'payer_reference',
+  bkash_payment_id: 'bkash_payment_id',
+  bkash_trx_id: 'bkash_trx_id',
+  paid_at: 'paid_at',
+  gatewayResponse: 'gatewayResponse',
+  refund_amount: 'refund_amount',
+  refund_trx_id: 'refund_trx_id',
+  refund_reason: 'refund_reason',
+  refunded_at: 'refunded_at',
+  updated_at: 'updated_at',
+  created_at: 'created_at',
+  emergencyService_id: 'emergencyService_id',
+  user_id: 'user_id'
+} as const
+
+export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
+
+
 export const RequesterScalarFieldEnum = {
   id: 'id',
   patientName: 'patientName',
@@ -213,6 +239,14 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -227,4 +261,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

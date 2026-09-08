@@ -43,6 +43,11 @@ export type EmergencyService = Prisma.EmergencyServiceModel
  */
 export type Hospital = Prisma.HospitalModel
 /**
+ * Model Payment
+ * 
+ */
+export type Payment = Prisma.PaymentModel
+/**
  * Model Requester
  * 
  */

@@ -1,7 +1,7 @@
 model BookingService {
     id String @id @default(uuid())
 
-    booking_status BookingStatus @default(IN_PROGRESS)
+    booking_status BookingStatus @default(PENDING)
     payment_status PaymentStatus @default(PENDING)
 
     payment_amount Decimal    @db.Decimal(10, 2)

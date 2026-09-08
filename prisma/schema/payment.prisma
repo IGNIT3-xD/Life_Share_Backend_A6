@@ -1,0 +1,33 @@
+model Payment {
+    id String @id @default(uuid())
+
+    payment_status PaymentStatus @default(PENDING)
+
+    payment_amount  Decimal    @db.Decimal(10, 2)
+    currency        String     @default("BDT")
+    payment_gateway PaymentVia
+
+    merchant_invoice_number String?   @unique
+    payer_reference         String?
+    bkash_payment_id        String?   @unique
+    bkash_trx_id            String?
+    paid_at                 DateTime?
+
+    gatewayResponse Json?
+
+    refund_amount Decimal?  @db.Decimal(10, 2)
+    refund_trx_id String?
+    refund_reason String?
+    refunded_at   DateTime?
+
+    updated_at DateTime @updatedAt
+    created_at DateTime @default(now())
+
+    emergencyService_id String
+    emergencyService    EmergencyService @relation(fields: [emergencyService_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+    user_id String
+    user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+    @@map("payment")
+}

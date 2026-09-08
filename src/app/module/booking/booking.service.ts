@@ -41,7 +41,7 @@ const createBookingService = async (
 		}
 
 		if (
-			isBookingAlreadyExist.booking_status === BookingStatus.IN_PROGRESS ||
+			isBookingAlreadyExist.booking_status === BookingStatus.ACCEPTED ||
 			isBookingAlreadyExist.booking_status === BookingStatus.PENDING
 		) {
 			throw new AppError(
@@ -63,8 +63,7 @@ const createBookingService = async (
 			note: payload.note,
 			user_id: userData.id,
 			emergencyService_id: service.id,
-			hospital_id: service.hospital_id,
-			booking_status: BookingStatus.PENDING,
+			hospital_id: service.hospital_id
 		},
 	});
 
@@ -92,7 +91,7 @@ const updateBookingService = async (
 
 	if (
 		booking.booking_status !== BookingStatus.PENDING &&
-		booking.booking_status !== BookingStatus.IN_PROGRESS
+		booking.booking_status !== BookingStatus.ACCEPTED
 	) {
 		throw new AppError(
 			400,

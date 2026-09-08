@@ -7,6 +7,7 @@ export default {
 	PORT: process.env.PORT,
 	DATABASE_URL: process.env.DATABASE_URL,
 	FRONTEND_URL: process.env.FRONTEND_URL,
+	BACKEND_URL: process.env.BACKEND_URL,
 	NODE_ENV: process.env.NODE_ENV,
 	JWT_ACCESS: process.env.JWT_ACCESS as string,
 	JWT_REFRESH: process.env.JWT_REFRESH as string,
@@ -34,4 +35,9 @@ export default {
 	TESTER_HOSPITAL_NAME: process.env.TESTER_HOSPITAL_NAME,
 	TESTER_HOSPITAL_EMAIL: process.env.TESTER_HOSPITAL_EMAIL,
 	TESTER_HOSPITAL_PASSWORD: process.env.TESTER_HOSPITAL_PASSWORD,
+	BKASH_BASE_URL: process.env.BKASH_BASE_URL,
+	BKASH_USERNAME: process.env.BKASH_USERNAME as string,
+	BKASH_PASSWORD: process.env.BKASH_PASSWORD as string,
+	BKASH_APP_KEY: process.env.BKASH_APP_KEY as string,
+	BKASH_APP_SECRET: process.env.BKASH_APP_SECRET
 };

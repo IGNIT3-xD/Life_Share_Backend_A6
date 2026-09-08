@@ -144,7 +144,7 @@ export type ServiceCategory = (typeof ServiceCategory)[keyof typeof ServiceCateg
 export const BookingStatus = {
   PENDING: 'PENDING',
   CONFIRMED: 'CONFIRMED',
-  IN_PROGRESS: 'IN_PROGRESS',
+  ACCEPTED: 'ACCEPTED',
   COMPLETED: 'COMPLETED',
   CANCELLED: 'CANCELLED',
   FAILED: 'FAILED'
@@ -157,7 +157,8 @@ export const PaymentStatus = {
   PENDING: 'PENDING',
   PAID: 'PAID',
   FAILED: 'FAILED',
-  REFUNDED: 'REFUNDED'
+  REFUNDED: 'REFUNDED',
+  CANCELLED: 'CANCELLED'
 } as const
 
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]

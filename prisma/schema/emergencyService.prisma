@@ -17,6 +17,7 @@ model EmergencyService {
     updated_at DateTime @updatedAt
 
     bookingServices BookingService[]
+    payments        Payment[]
 
     @@index([service_category, service_status, price], name: "idx_emergency_service")
     @@map("emergencyServices")

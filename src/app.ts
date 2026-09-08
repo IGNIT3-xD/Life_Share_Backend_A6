@@ -9,6 +9,7 @@ import donationRouter from "./app/module/donation/donation.router";
 import hospitalRouter from "./app/module/hospital/hospital.route";
 import serviceRouter from "./app/module/emergencyService/service.router";
 import bookingRouter from "./app/module/booking/booking.router";
+import paymentRouter from "./app/module/payment/payment.router";
 
 const app: Application = express();
 
@@ -30,6 +31,7 @@ app.use("/api/v1/donation", donationRouter);
 app.use("/api/v1/hospital", hospitalRouter);
 app.use("/api/v1/emergency-service", serviceRouter);
 app.use("/api/v1/emergency-service-booking", bookingRouter);
+app.use("/api/v1/payment", paymentRouter);
 
 app.use(globalErrorHandler);
 
