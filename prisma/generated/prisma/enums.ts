@@ -161,3 +161,11 @@ export const PaymentStatus = {
 } as const
 
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
+
+
+export const PaymentVia = {
+  BKASH: 'BKASH',
+  ON_HAND: 'ON_HAND'
+} as const
+
+export type PaymentVia = (typeof PaymentVia)[keyof typeof PaymentVia]

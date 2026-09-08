@@ -81,15 +81,18 @@ export const BookingServiceScalarFieldEnum = {
   booking_status: 'booking_status',
   payment_status: 'payment_status',
   payment_amount: 'payment_amount',
+  payment_via: 'payment_via',
   emergency_location: 'emergency_location',
   description: 'description',
   patient_name: 'patient_name',
   patient_number: 'patient_number',
+  note: 'note',
   scheduled_at: 'scheduled_at',
   completed_at: 'completed_at',
   created_at: 'created_at',
   updated_at: 'updated_at',
   user_id: 'user_id',
+  hospital_id: 'hospital_id',
   emergencyService_id: 'emergencyService_id'
 } as const
 

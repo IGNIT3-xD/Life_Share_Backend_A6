@@ -106,3 +106,8 @@ enum PaymentStatus {
     FAILED
     REFUNDED
 }
+
+enum PaymentVia {
+    BKASH
+    ON_HAND
+}

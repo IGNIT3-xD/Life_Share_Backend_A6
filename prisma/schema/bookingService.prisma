@@ -4,14 +4,18 @@ model BookingService {
     booking_status BookingStatus @default(IN_PROGRESS)
     payment_status PaymentStatus @default(PENDING)
 
-    payment_amount     Decimal @db.Decimal(10, 2)
+    payment_amount Decimal    @db.Decimal(10, 2)
+    payment_via    PaymentVia
+
     emergency_location String
 
     description    String
     patient_name   String
     patient_number String
 
-    scheduled_at String
+    note String?
+
+    scheduled_at DateTime
     completed_at DateTime?
 
     created_at DateTime @default(now())
@@ -19,6 +23,9 @@ model BookingService {
 
     user_id String
     user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+    hospital_id String
+    hospital    Hospital @relation(fields: [hospital_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
     emergencyService_id String
     emergencyService    EmergencyService @relation(fields: [emergencyService_id], references: [id], onDelete: Cascade, onUpdate: Cascade)

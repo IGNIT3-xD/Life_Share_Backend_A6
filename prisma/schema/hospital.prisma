@@ -12,6 +12,7 @@ model Hospital {
     user_id           String             @unique
     user              User               @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
     emergencyServices EmergencyService[]
+    bookingServices   BookingService[]
 
     @@map("hospital")
 }
