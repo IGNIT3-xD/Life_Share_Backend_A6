@@ -39,5 +39,5 @@ export default {
 	BKASH_USERNAME: process.env.BKASH_USERNAME as string,
 	BKASH_PASSWORD: process.env.BKASH_PASSWORD as string,
 	BKASH_APP_KEY: process.env.BKASH_APP_KEY as string,
-	BKASH_APP_SECRET: process.env.BKASH_APP_SECRET
+	BKASH_APP_SECRET: process.env.BKASH_APP_SECRET,
 };

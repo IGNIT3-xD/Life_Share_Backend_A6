@@ -1,91 +1,276 @@
-import { BookingStatus, PaymentVia } from "../../../../prisma/generated/prisma/enums"
-import config from "../../config"
-import { getBkashIdToken } from "../../lib/bkash"
-import { prisma } from "../../lib/prisma"
-import AppError from "../../utils/AppError"
-import { validateUserById } from "../../utils/isUserExist"
-import type { IUser } from "../user/user.interface"
+import {
+	BookingStatus,
+	PaymentVia,
+} from "../../../../prisma/generated/prisma/enums";
+import config from "../../config";
+import { getBkashIdToken } from "../../lib/bkash";
+import { prisma } from "../../lib/prisma";
+import AppError from "../../utils/AppError";
+import { validateUserById } from "../../utils/isUserExist";
+import type { IUser } from "../user/user.interface";
 
 const createPayemntService = async (user: IUser, booking_id: string) => {
-    const userData = await validateUserById(user.userId)
+	const userData = await validateUserById(user.userId);
 
-    const booking = await prisma.bookingService.findUnique({
-        where: { id: booking_id }
-    })
+	const booking = await prisma.bookingService.findUnique({
+		where: { id: booking_id },
+	});
 
-    if (!booking) {
-        throw new AppError(404, "Not booking found.")
-    }
+	if (!booking) {
+		throw new AppError(404, "Not booking found.");
+	}
 
-    if (booking.booking_status !== BookingStatus.ACCEPTED) {
-        throw new AppError(403, `Your booking is ${booking.booking_status}`)
-    }
+	if (
+		booking.booking_status !== BookingStatus.ACCEPTED &&
+		booking.booking_status !== BookingStatus.FAILED
+	) {
+		throw new AppError(
+			403,
+			`This booking cannot be paid right now. Current booking status: ${booking.booking_status.toLowerCase()}`,
+		);
+	}
 
-    if (userData.id !== booking.user_id) {
-        throw new AppError(403, "Unauthorized access.")
-    }
+	if (userData.id !== booking.user_id) {
+		throw new AppError(403, "Unauthorized access.");
+	}
 
-    const payment = await prisma.payment.findFirst({
-        where: {
-            user_id: userData.id,
-            emergencyService_id: booking.emergencyService_id
-        }
-    })
+	// Initialize payment
+	const existingPayment = await prisma.payment.findUnique({
+		where: {
+			merchant_invoice_number: booking.id,
+		},
+	});
 
-    if (payment?.payment_status === 'PAID') {
-        throw new AppError(400, "You have already paid for this service.")
-    }
+	if (existingPayment) {
+		if (existingPayment.payment_status === "PAID") {
+			throw new AppError(
+				400,
+				"This service has already been paid successfully.",
+			);
+		}
+	}
 
-    // Initialize payment
-    const result = await prisma.$transaction(async (tx) => {
-        const bkashIdToken = await getBkashIdToken()
+	const bkashIdToken = await getBkashIdToken();
 
-        if (!bkashIdToken) {
-            throw new AppError(404, "Bkash id token not found.")
-        }
+	if (!bkashIdToken) {
+		throw new AppError(404, "Bkash id token not found.");
+	}
 
-        const createPayment = await fetch(`${config.BKASH_BASE_URL}/tokenized/checkout/create`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-                Authorization: bkashIdToken,
-                "X-App-Key": config.BKASH_APP_KEY,
-            },
-            body: JSON.stringify({
-                agreementID: "TokenizedMerchant01L3IKB6H1565072174986",
-                mode: "0011",
-                payerReference: user.email,
-                callbackURL: `${config.BACKEND_URL}/api/v1/payment/callback`,
-                merchantAssociationInfo: "MI05MID54RF09123456One",
-                amount: booking.payment_amount,
-                currency: "BDT",
-                intent: "sale",
-                merchantInvoiceNumber: booking.id,
-            })
-        })
+	const bKashResponse = await fetch(
+		`${config.BKASH_BASE_URL}/tokenized/checkout/create`,
+		{
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Accept: "application/json",
+				Authorization: bkashIdToken,
+				"X-App-Key": config.BKASH_APP_KEY,
+			},
+			body: JSON.stringify({
+				agreementID: "TokenizedMerchant01L3IKB6H1565072174986",
+				mode: "0011",
+				payerReference: user.email,
+				callbackURL: `${config.BACKEND_URL}/api/v1/payment/callback`,
+				merchantAssociationInfo: "MI05MID54RF09123456One",
+				amount: booking.payment_amount,
+				currency: "BDT",
+				intent: "sale",
+				merchantInvoiceNumber: booking.id,
+			}),
+		},
+	);
 
-        const paymentResult = await createPayment.json();
+	if (!bKashResponse.ok) {
+		throw new AppError(
+			502,
+			"Failed to initialize communication with bKash gateway.",
+		);
+	}
 
-        await tx.payment.create({
-            data: {
-                payment_amount: paymentResult.amount,
-                payment_gateway: PaymentVia.BKASH,
-                merchant_invoice_number: paymentResult.merchantInvoiceNumber,
-                bkash_payment_id: paymentResult.paymentID,
-                payer_reference: user.email,
-                gatewayResponse: paymentResult,
-                emergencyService_id: booking.emergencyService_id,
-                user_id: user.userId
-            }
-        })
+	const paymentResult = await bKashResponse.json();
 
-        return paymentResult.bkashURL;
-    })
+	const result = await prisma.$transaction(async (tx) => {
+		if (existingPayment) {
+			await tx.payment.update({
+				where: { id: existingPayment.id },
+				data: {
+					bkash_payment_id: paymentResult.paymentID,
+					payment_status: "PENDING",
+					gatewayResponse: paymentResult,
+				},
+			});
+		} else {
+			await tx.payment.create({
+				data: {
+					payment_amount: paymentResult.amount,
+					payment_gateway: PaymentVia.BKASH,
+					merchant_invoice_number: booking.id,
+					bkash_payment_id: paymentResult.paymentID,
+					payer_reference: user.email,
+					gatewayResponse: paymentResult,
+					emergencyService_id: booking.emergencyService_id,
+					user_id: userData.id,
+				},
+			});
+		}
 
-    return result
-}
+		return paymentResult.bkashURL;
+	});
+
+	return result;
+};
+
+const createPaymentCallbackService = async (query: Record<string, any>) => {
+	const paymentId = query.paymentID;
+	const status = query.status;
+
+	if (!paymentId) {
+		throw new AppError(404, "Failed to get payment id.");
+	}
+
+	if (!status) {
+		throw new AppError(404, "Failed to get payment status.");
+	}
+
+	const bkashIdToken = await getBkashIdToken();
+
+	if (!bkashIdToken) {
+		throw new AppError(404, "Bkash id token not found.");
+	}
+
+	const executePayment = await fetch(
+		`${config.BKASH_BASE_URL}/tokenized/checkout/execute`,
+		{
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Accept: "application/json",
+				Authorization: bkashIdToken,
+				"X-App-Key": config.BKASH_APP_KEY,
+			},
+			body: JSON.stringify({
+				paymentID: paymentId,
+			}),
+		},
+	);
+
+	if (!executePayment.ok) {
+		throw new AppError(
+			502,
+			"Failed to initialize communication with bKash gateway.",
+		);
+	}
+
+	const executePaymentResult = await executePayment.json();
+
+	const existingLocalPayment = await prisma.payment.findFirst({
+		where: { bkash_payment_id: paymentId },
+	});
+
+	if (!existingLocalPayment) {
+		throw new AppError(
+			404,
+			`No local payment record matched the bKash token ID: ${paymentId}`,
+		);
+	}
+
+	const result = await prisma.$transaction(async (tx) => {
+		// console.log(">>> Enter in the Transaction");
+
+		if (status === "success") {
+			// console.log(">>> 1: Success");
+
+			await tx.payment.update({
+				where: {
+					id: existingLocalPayment.id,
+				},
+				data: {
+					payment_status: "PAID",
+					bkash_trx_id: executePaymentResult.trxID,
+					gatewayResponse: executePaymentResult,
+				},
+			});
+
+			await tx.bookingService.update({
+				where: {
+					id: existingLocalPayment.merchant_invoice_number as string,
+				},
+				data: {
+					booking_status: "CONFIRMED",
+					payment_status: "PAID",
+				},
+			});
+
+			return {
+				redirectUrl: `${config.FRONTEND_URL}/payment?status=success`,
+			};
+		} else if (status === "failure") {
+			// console.log(">>> 2: Failure");
+
+			await tx.payment.update({
+				where: {
+					id: existingLocalPayment.id,
+				},
+				data: {
+					payment_status: "FAILED",
+					gatewayResponse: executePaymentResult,
+				},
+			});
+
+			await tx.bookingService.update({
+				where: {
+					id: existingLocalPayment.merchant_invoice_number as string,
+				},
+				data: {
+					booking_status: "FAILED",
+					payment_status: "FAILED",
+				},
+			});
+
+			return {
+				redirectUrl: `${config.FRONTEND_URL}/payment?status=failure`,
+			};
+		} else if (status === "cancel") {
+			// console.log(">>> 3: Cancel");
+
+			await tx.payment.update({
+				where: {
+					id: existingLocalPayment.id,
+				},
+				data: {
+					payment_status: "CANCELLED",
+					gatewayResponse: executePaymentResult,
+				},
+			});
+
+			await tx.bookingService.update({
+				where: {
+					id: existingLocalPayment.merchant_invoice_number as string,
+				},
+				data: {
+					booking_status: "FAILED",
+					payment_status: "CANCELLED",
+				},
+			});
+
+			return {
+				redirectUrl: `${config.FRONTEND_URL}/payment?status=cancel`,
+			};
+		} else {
+			// console.log(">>> 4: In the end");
+			return {
+				executePaymentResult,
+				redirectUrl: `${config.FRONTEND_URL}/dashboard/my-bookings`,
+			};
+		}
+	});
+
+	// console.log(">>> End of the code");
+
+	return result;
+};
 
 export const PaymentService = {
-    createPayemntService
-}   
+	createPayemntService,
+	createPaymentCallbackService,
+};

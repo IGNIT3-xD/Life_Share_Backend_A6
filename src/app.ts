@@ -10,8 +10,17 @@ import hospitalRouter from "./app/module/hospital/hospital.route";
 import serviceRouter from "./app/module/emergencyService/service.router";
 import bookingRouter from "./app/module/booking/booking.router";
 import paymentRouter from "./app/module/payment/payment.router";
+import config from "./app/config";
+import cors from "cors";
 
 const app: Application = express();
+
+app.use(
+	cors({
+		origin: config.FRONTEND_URL,
+		credentials: true,
+	}),
+);
 
 // Enable URL-encoded form data parsing
 app.use(express.urlencoded({ extended: true }));

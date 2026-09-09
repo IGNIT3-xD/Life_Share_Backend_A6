@@ -6,9 +6,14 @@ import { PaymentController } from "./payment.controller";
 const paymentRouter = Router();
 
 paymentRouter.post(
-    "/:id",
-    auth(Role.ADMIN, Role.SUPER_ADMIN, Role.DONOR, Role.USER, Role.HOSPITAL),
-    PaymentController.createPaymentController
+	"/:id",
+	auth(Role.ADMIN, Role.SUPER_ADMIN, Role.DONOR, Role.USER, Role.HOSPITAL),
+	PaymentController.createPaymentController,
+);
+
+paymentRouter.get(
+	"/callback",
+	PaymentController.createPaymentCallbackController,
 );
 
 export default paymentRouter;

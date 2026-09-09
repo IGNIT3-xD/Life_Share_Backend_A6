@@ -63,7 +63,7 @@ const createBookingService = async (
 			note: payload.note,
 			user_id: userData.id,
 			emergencyService_id: service.id,
-			hospital_id: service.hospital_id
+			hospital_id: service.hospital_id,
 		},
 	});
 
