@@ -48,7 +48,7 @@ const getMyBookingController = catchAsync(
 	async (req: Request, res: Response) => {
 		const user = req.user as IUser;
 
-		const result = await BookingService.getMyBookingsService(user);
+		const result = await BookingService.getMyBookingsService(user, req.query);
 
 		sendResponse(res, {
 			statusCode: 200,

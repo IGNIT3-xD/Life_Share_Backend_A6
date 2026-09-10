@@ -4,9 +4,12 @@ import AppError from "../../utils/AppError";
 import { validateUserById } from "../../utils/isUserExist";
 import type {
 	IBloodRequester,
+	IRequesterQuery,
 	IRequestUpdate,
 	IUpdateProfile,
+	IUpdateProfileStatus,
 	IUser,
+	IUserQuery,
 } from "./user.interface";
 import cloudinary from "../../lib/cloudinary";
 import type { UploadApiResponse } from "cloudinary";
@@ -58,14 +61,49 @@ const makeBloodRequestService = async (
 	return bloodRequest;
 };
 
-const getAllRequestersService = async () => {
-	const requester = await prisma.requester.findMany({
-		where: {
-			verificationStatus: "VERIFIED",
-		},
-	});
+const getAllRequestersService = async (query: IRequesterQuery) => {
+	const { search, blood_group, urgency, sortBy = "desc", page = 1, limit = 10 } = query
 
-	return requester;
+	const where: Record<string, unknown> = {
+		verificationStatus: "VERIFIED",
+	}
+
+	if (search) {
+		where.OR = [
+			{ patientName: { contains: search, mode: "insensitive" } },
+			{ exact_location: { contains: search, mode: "insensitive" } },
+		];
+	}
+
+	if (blood_group) {
+		where.blood_group = blood_group
+	}
+
+	if (urgency) {
+		where.urgency = urgency
+	}
+
+	const skip = (page - 1) * limit
+
+	const [requester, total] = await Promise.all([
+		prisma.requester.findMany({
+			where,
+			skip,
+			take: limit,
+			orderBy: { created_at: sortBy }
+		}),
+		prisma.requester.count({ where })
+	])
+
+	return {
+		requester,
+		meta: {
+			total,
+			page,
+			limit,
+			totalPages: Math.ceil(total / limit)
+		}
+	};
 };
 
 const getMyRequestService = async (user: IUser) => {
@@ -152,11 +190,13 @@ const deleteMyRequestService = async (user: IUser, request_id: string) => {
 		throw new AppError(404, "No request record found.");
 	}
 
-	if (requestData.user_id !== user.userId) {
-		throw new AppError(
-			403,
-			"Unauthorized access. You do not own this request record.",
-		);
+	if (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN') {
+		if (requestData.user_id !== user.userId) {
+			throw new AppError(
+				403,
+				"Unauthorized access. You do not own this request record.",
+			);
+		}
 	}
 
 	await prisma.requester.delete({
@@ -237,6 +277,90 @@ const updateProfileService = async (
 	return updateProfile;
 };
 
+// Admin Controlled
+const getAllUser = async (query: IUserQuery) => {
+	const { search, gender, is_active, is_blocked, limit = 10, page = 1, role, sortBy = 'desc' } = query
+
+	const where: Record<string, unknown> = {}
+
+	if (search) {
+		where.OR = [
+			{ name: { contains: search, mode: "insensitive" } },
+			{ email: { contains: search, mode: "insensitive" } },
+			{ address: { contains: search, mode: "insensitive" } },
+			{ phone: { contains: search, mode: "insensitive" } },
+		]
+	}
+
+	if (gender) {
+		where.gender = gender
+	}
+
+	if (is_active) {
+		where.is_active = is_active
+	}
+
+	if (is_blocked) {
+		where.is_blocked = is_active
+	}
+
+	if (role) {
+		where.role = role
+	}
+
+	const skip = (page - 1) * limit
+
+	const [user, total] = await Promise.all([
+		prisma.user.findMany({
+			where,
+			take: limit,
+			skip,
+			orderBy: { created_at: sortBy }
+		}),
+		prisma.user.count()
+	])
+
+	return {
+		user,
+		meta: {
+			total,
+			page,
+			limit,
+			totalPages: Math.ceil(total / limit)
+		}
+	}
+}
+
+const updateUserStatus = async (id: string, payload: IUpdateProfileStatus) => {
+	const user = await prisma.user.findUnique({ where: { id } })
+
+	if (!user) {
+		throw new AppError(404, "User not found.")
+	}
+
+	const updateUser = await prisma.user.update({
+		where: { id },
+		data: {
+			is_active: payload.is_active,
+			is_blocked: payload.is_blocked
+		}
+	})
+
+	return updateUser
+}
+
+const deleteUser = async (id: string) => {
+	const user = await prisma.user.findUnique({ where: { id } })
+
+	if (!user) {
+		throw new AppError(404, "User not found.")
+	}
+
+	await prisma.user.delete({
+		where: { id },
+	})
+}
+
 export const UserService = {
 	getMeService,
 	makeBloodRequestService,
@@ -246,4 +370,7 @@ export const UserService = {
 	updateMyRequestService,
 	deleteMyRequestService,
 	updateProfileService,
+	getAllUser,
+	updateUserStatus,
+	deleteUser
 };

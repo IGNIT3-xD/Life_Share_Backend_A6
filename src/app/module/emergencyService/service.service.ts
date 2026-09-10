@@ -4,7 +4,7 @@ import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import { validateUserById } from "../../utils/isUserExist";
 import type { IUser } from "../user/user.interface";
-import type { IService, IUpdateService } from "./service.interface";
+import type { IService, IServiceQuery, IUpdateService } from "./service.interface";
 
 const createService = async (
 	user: IUser,
@@ -78,16 +78,52 @@ const createService = async (
 	return service;
 };
 
-const getAllService = async () => {
-	const services = await prisma.emergencyService.findMany({
-		where: { service_status: "ACTIVE" },
-	});
+const getAllService = async (query: IServiceQuery) => {
+	const { search, service_category, sortBy = "desc", sortByPrice, page = 1, limit = 10 } = query
+
+	const where: Record<string, unknown> = {
+		service_status: "ACTIVE"
+	}
+
+	if (search) {
+		where.OR = [
+			{ service_name: { contains: search, mode: "insensitive" } }
+		];
+	}
+
+	if (service_category) {
+		where.service_category = service_category
+	}
+
+	const skip = (page - 1) * limit;
+
+	const orderBy = sortByPrice
+		? { price: sortByPrice }
+		: { created_at: sortBy };
+
+	const [services, total] = await Promise.all([
+		prisma.emergencyService.findMany({
+			where,
+			skip,
+			take: limit,
+			orderBy
+		}),
+		prisma.emergencyService.count({ where })
+	])
 
 	if (!services) {
 		throw new AppError(404, "No service found.");
 	}
 
-	return services;
+	return {
+		services,
+		meta: {
+			total,
+			page,
+			limit,
+			totalPages: Math.ceil(total / limit)
+		}
+	};
 };
 
 const getServiceDetails = async (id: string) => {
@@ -119,20 +155,54 @@ const getServiceDetails = async (id: string) => {
 	return service;
 };
 
-const getMyServices = async (user: IUser) => {
-	const services = await prisma.emergencyService.findMany({
-		where: {
-			hospital: {
-				user_id: user.userId,
-			},
-		},
-	});
+const getMyServices = async (user: IUser, query: IServiceQuery) => {
+	const { search, service_category, sortBy = "desc", sortByPrice, page = 1, limit = 10 } = query
+
+	const where: Record<string, unknown> = {
+		hospital: {
+			user_id: user.userId,
+		}
+	}
+
+	if (search) {
+		where.OR = [
+			{ service_name: { contains: search, mode: "insensitive" } }
+		];
+	}
+
+	if (service_category) {
+		where.service_category = service_category
+	}
+
+	const orderBy = sortByPrice
+		? { price: sortByPrice }
+		: { created_at: sortBy };
+
+	const skip = (page - 1) * limit;
+
+	const [services, total] = await Promise.all([
+		prisma.emergencyService.findMany({
+			where,
+			skip,
+			take: limit,
+			orderBy
+		}),
+		prisma.emergencyService.count()
+	]);
 
 	if (!services) {
 		throw new AppError(404, "No service found.");
 	}
 
-	return services;
+	return {
+		services,
+		meta: {
+			total,
+			page,
+			limit,
+			totalPages: Math.ceil(total / limit)
+		}
+	};
 };
 
 const updateMyService = async (
@@ -216,8 +286,10 @@ const deleteMyService = async (user: IUser, id: string) => {
 		throw new AppError(404, "No service found.");
 	}
 
-	if (service.hospital.user_id !== user.userId) {
-		throw new AppError(403, "Unauthorized access.");
+	if (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN') {
+		if (service.hospital.user_id !== user.userId) {
+			throw new AppError(403, "Unauthorized access.");
+		}
 	}
 
 	await prisma.emergencyService.delete({ where: { id } });

@@ -5,6 +5,7 @@ import { validateUserById } from "../../utils/isUserExist";
 import type { IUser } from "../auth/auth.interface";
 import type {
 	IBooking,
+	IBookingQuery,
 	IUpdateBooking,
 	IUpdateBookingStatus,
 } from "./booking.interface";
@@ -116,18 +117,62 @@ const updateBookingService = async (
 	return updateBooking;
 };
 
-const getMyBookingsService = async (user: IUser) => {
-	const bookings = await prisma.bookingService.findMany({
-		where: {
-			user_id: user.userId,
-		},
-	});
+const getMyBookingsService = async (user: IUser, query: IBookingQuery) => {
+	const { booking_status, payment_status, payment_via, sortBy = "desc", sortByAmount = "desc", search, limit = 10, page = 1 } = query
+
+	const where: Record<string, unknown> = {
+		user_id: user.userId,
+	}
+
+	if (booking_status) {
+		where.booking_status = booking_status
+	}
+
+	if (payment_status) {
+		where.payment_status = payment_status
+	}
+
+	if (payment_via) {
+		where.payment_via = payment_via
+	}
+
+	if (search) {
+		where.OR = [
+			{ patient_name: { contains: search, mode: "insensitive" } },
+			{ patient_number: { contains: search, mode: "insensitive" } },
+			{ emergency_location: { contains: search, mode: "insensitive" } },
+		]
+	}
+
+	const orderBy = sortByAmount
+		? { payment_amount: sortByAmount }
+		: { created_at: sortBy };
+
+	const skip = (page - 1) * limit;
+
+	const [bookings, total] = await Promise.all([
+		prisma.bookingService.findMany({
+			where,
+			skip,
+			take: limit,
+			orderBy
+		}),
+		prisma.bookingService.count()
+	]);
 
 	if (!bookings) {
 		throw new AppError(404, "Booking not found.");
 	}
 
-	return bookings;
+	return {
+		bookings,
+		meta: {
+			total,
+			page,
+			limit,
+			totalPages: Math.ceil(total / limit)
+		}
+	};
 };
 
 const getMyBookingDetailsService = async (user: IUser, booking_id: string) => {

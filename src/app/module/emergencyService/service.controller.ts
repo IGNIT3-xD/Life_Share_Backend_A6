@@ -26,8 +26,8 @@ const createServiceController = catchAsync(
 );
 
 const getAllServiceController = catchAsync(
-	async (_req: Request, res: Response) => {
-		const result = await EmergencyService.getAllService();
+	async (req: Request, res: Response) => {
+		const result = await EmergencyService.getAllService(req.query);
 
 		sendResponse(res, {
 			statusCode: 200,
@@ -56,7 +56,7 @@ const getServiceDetailsController = catchAsync(
 const getMyServicesController = catchAsync(
 	async (req: Request, res: Response) => {
 		const user = req.user as IUser;
-		const result = await EmergencyService.getMyServices(user);
+		const result = await EmergencyService.getMyServices(user, req.query);
 
 		sendResponse(res, {
 			statusCode: 200,

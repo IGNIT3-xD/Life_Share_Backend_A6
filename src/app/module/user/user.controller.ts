@@ -33,8 +33,8 @@ const makeBloodRequestController = catchAsync(
 );
 
 const getAllRequesterController = catchAsync(
-	async (_req: Request, res: Response) => {
-		const result = await UserService.getAllRequestersService();
+	async (req: Request, res: Response) => {
+		const result = await UserService.getAllRequestersService(req.query);
 
 		sendResponse(res, {
 			statusCode: 200,
@@ -115,6 +115,8 @@ const deleteMyRequestController = catchAsync(
 	},
 );
 
+// Admin Controlled
+
 const updateProfileController = catchAsync(
 	async (req: Request, res: Response) => {
 		const user = req.user as IUser;
@@ -134,6 +136,44 @@ const updateProfileController = catchAsync(
 	},
 );
 
+const getAllUserController = catchAsync(
+	async (req: Request, res: Response) => {
+		const result = await UserService.getAllUser(req.query);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "Users retrieved successfully",
+			data: result,
+		});
+	},
+);
+
+const updateUserStatusController = catchAsync(
+	async (req: Request, res: Response) => {
+		const result = await UserService.updateUserStatus(req.params.id as string, req.body);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "User status updated successfully",
+			data: result,
+		});
+	},
+);
+
+const deleteUserController = catchAsync(
+	async (req: Request, res: Response) => {
+		await UserService.deleteUser(req.params.id as string);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "User status updated successfully"
+		});
+	},
+);
+
 export const UserController = {
 	getMeController,
 	makeBloodRequestController,
@@ -143,4 +183,7 @@ export const UserController = {
 	updateMyRequestController,
 	deleteMyRequestController,
 	updateProfileController,
+	getAllUserController,
+	updateUserStatusController,
+	deleteUserController
 };

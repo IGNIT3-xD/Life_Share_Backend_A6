@@ -1,7 +1,9 @@
 import type {
 	BookingStatus,
+	PaymentStatus,
 	PaymentVia,
 } from "../../../../prisma/generated/prisma/enums";
+import type { SortOrder } from "../donor/donor.interface";
 
 export interface IBooking {
 	payment_via: PaymentVia;
@@ -31,4 +33,15 @@ export interface IUpdateBooking {
 
 export interface IUpdateBookingStatus {
 	booking_status: BookingStatus;
+}
+
+export interface IBookingQuery {
+	search?: string;
+	booking_status?: BookingStatus;
+	payment_status?: PaymentStatus;
+	payment_via?: PaymentVia;
+	sortBy?: SortOrder;
+	sortByAmount?: SortOrder;
+	page?: number;
+	limit?: number;
 }

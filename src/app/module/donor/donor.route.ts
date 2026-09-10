@@ -16,6 +16,8 @@ donorRouter.post(
 
 donorRouter.get("/", DonorController.getAllDonorsController);
 
+donorRouter.get("/admin", auth(Role.SUPER_ADMIN, Role.ADMIN), DonorController.adminGetAllDonorsController);
+
 donorRouter.get(
 	"/donation-request",
 	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL),
@@ -38,6 +40,18 @@ donorRouter.patch(
 donorRouter.get(
 	"/donor-profile/:id",
 	DonorController.getDonorProfileController,
+);
+
+donorRouter.delete(
+	"/donor-profile/:id",
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
+	DonorController.deleteDonorProfileController,
+);
+
+donorRouter.put(
+	"/donor-profile-status/:id",
+	auth(Role.SUPER_ADMIN, Role.ADMIN),
+	DonorController.updateDonorProfileStatusController,
 );
 
 donorRouter.patch(

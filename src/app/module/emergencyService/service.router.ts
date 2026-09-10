@@ -39,7 +39,7 @@ serviceRouter.patch(
 
 serviceRouter.delete(
 	"/my-service/:id",
-	auth(Role.HOSPITAL),
+	auth(Role.HOSPITAL, Role.SUPER_ADMIN),
 	EmergencyServiceController.deleteMyServicesController,
 );
 

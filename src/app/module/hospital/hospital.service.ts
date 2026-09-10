@@ -5,6 +5,8 @@ import { validateUserById } from "../../utils/isUserExist";
 import type { IUser } from "../user/user.interface";
 import type {
 	HospitalProfile,
+	IHospitalQuery,
+	IHospitalStatus,
 	IUpdateHospitalProfile,
 } from "./hospital.interface";
 
@@ -108,8 +110,144 @@ const updateHospitalProfileService = async (
 	return updateProfile;
 };
 
+// Admin controlled
+const getAllHospitalProfile = async (query: IHospitalQuery) => {
+	const { hospital_status, sortBy = "desc", limit = 10, page = 1 } = query
+
+	const where: Record<string, unknown> = {}
+
+	if (hospital_status) {
+		where.hospital_status = hospital_status
+	}
+
+	const skip = (page - 1) * limit;
+
+	const [hospital, total] = await Promise.all([
+		prisma.hospital.findMany({
+			where,
+			skip,
+			take: limit,
+			orderBy: { created_at: sortBy },
+			include: {
+				user: {
+					select: {
+						name: true,
+						email: true,
+						address: true,
+						phone: true,
+						profile_pic: true
+					}
+				}
+			}
+		}),
+		prisma.hospital.count()
+	])
+
+	if (!hospital) {
+		throw new AppError(404, "Hospital profile not found")
+	}
+
+	return {
+		hospital,
+		meta: {
+			total,
+			page,
+			limit,
+			totalPages: Math.ceil(total / limit),
+		}
+	}
+};
+
+const getHospitalProfileDetails = async (id: string) => {
+	const hospital = await prisma.hospital.findUnique({
+		where: { id },
+		include: {
+			user: {
+				select: {
+					name: true,
+					email: true,
+					address: true,
+					phone: true,
+					profile_pic: true
+				}
+			},
+			emergencyServices: {
+				select: {
+					service_name: true,
+					service_category: true,
+					price: true,
+					service_status: true,
+					availability: true,
+					service_image: true,
+				}
+			}
+		}
+	})
+
+	if (!hospital) {
+		throw new AppError(404, "Hospital profile not found")
+	}
+
+	return hospital
+};
+
+const updateHospitalProfileStatus = async (id: string, payload: IHospitalStatus) => {
+	const isExist = await prisma.hospital.findUnique({
+		where: { id },
+	});
+
+	if (!isExist) {
+		throw new AppError(404, "Hospital profile is not exist.");
+	}
+
+	const updateProfile = await prisma.hospital.update({
+		where: { id },
+		data: {
+			hospital_status: payload.hospital_status
+		},
+		include: {
+			user: {
+				select: {
+					name: true,
+					email: true,
+					address: true,
+					phone: true,
+				},
+			},
+		},
+	});
+
+	return updateProfile;
+};
+
+const deleteHospitalProfile = async (user: IUser, id: string) => {
+	const isExist = await prisma.hospital.findUnique({
+		where: { id },
+	});
+
+	if (!isExist) {
+		throw new AppError(404, "Hospital profile is not exist.");
+	}
+
+	const userData = await validateUserById(user.userId);
+
+	if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+		if (isExist.user_id !== userData.id) {
+			throw new AppError(403, "Unauthorized access.")
+		}
+	}
+
+	await prisma.hospital.delete({
+		where: { id },
+	});
+};
+
 export const HospitalService = {
 	createHospitalProfileService,
 	getMyHospitalProfileService,
 	updateHospitalProfileService,
+	getAllHospitalProfile,
+	getHospitalProfileDetails,
+	updateHospitalProfileStatus,
+	deleteHospitalProfile
 };

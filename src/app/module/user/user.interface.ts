@@ -5,6 +5,7 @@ import type {
 	RequestUrgency,
 	Role,
 } from "../../../../prisma/generated/prisma/enums";
+import type { SortOrder } from "../donor/donor.interface";
 
 export interface IUser {
 	userId: string;
@@ -43,4 +44,29 @@ export interface IUpdateProfile {
 	gender?: Gender;
 	profile_pic?: string;
 	profile_pic_public_id?: string;
+}
+
+export interface IRequesterQuery {
+	search?: string;
+	blood_group?: BloodGroup;
+	urgency?: RequestUrgency;
+	sortBy?: SortOrder;
+	page?: number;
+	limit?: number;
+}
+
+export interface IUserQuery {
+	search?: string;
+	role?: Role;
+	gender?: Gender;
+	is_active?: boolean;
+	is_blocked?: boolean;
+	sortBy?: SortOrder;
+	page?: number;
+	limit?: number;
+}
+
+export interface IUpdateProfileStatus {
+	is_active?: boolean;
+	is_blocked?: boolean;
 }

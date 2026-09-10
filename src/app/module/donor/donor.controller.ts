@@ -20,8 +20,8 @@ const createDonorProfileController = catchAsync(
 );
 
 const getAllDonorsController = catchAsync(
-	async (_req: Request, res: Response) => {
-		const result = await DonorService.getAllDonorsService();
+	async (req: Request, res: Response) => {
+		const result = await DonorService.getAllDonorsService(req.query);
 
 		sendResponse(res, {
 			statusCode: 200,
@@ -35,7 +35,7 @@ const getAllDonorsController = catchAsync(
 const getDonationRequestController = catchAsync(
 	async (req: Request, res: Response) => {
 		const user = req.user as IUser;
-		const result = await DonorService.getDonationRequestService(user);
+		const result = await DonorService.getDonationRequestService(user, req.query);
 
 		sendResponse(res, {
 			statusCode: 200,
@@ -130,6 +130,50 @@ const getDonorRequestController = catchAsync(
 	},
 );
 
+// Admin Controlled
+const adminGetAllDonorsController = catchAsync(
+	async (req: Request, res: Response) => {
+		const result = await DonorService.adminGetAllDonorsService(req.query);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "All Donors retrieved successfully",
+			data: result,
+		});
+	},
+);
+
+const updateDonorProfileStatusController = catchAsync(
+	async (req: Request, res: Response) => {
+		const donor_id = req.params.id as string;
+
+		const result = await DonorService.updateDonorProfileStatusService(donor_id, req.body);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "Donor profile retrieved successfully",
+			data: result,
+		});
+	},
+);
+
+const deleteDonorProfileController = catchAsync(
+	async (req: Request, res: Response) => {
+		const donor_id = req.params.id as string;
+		const user = req.user as IUser
+
+		await DonorService.deleteDonorProfileService(user, donor_id);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "Donor profile deleted successfully",
+		});
+	},
+);
+
 export const DonorController = {
 	createDonorProfileController,
 	getAllDonorsController,
@@ -139,4 +183,7 @@ export const DonorController = {
 	getDonorProfileController,
 	updateDonorProfileController,
 	getDonorRequestController,
+	updateDonorProfileStatusController,
+	adminGetAllDonorsController,
+	deleteDonorProfileController
 };

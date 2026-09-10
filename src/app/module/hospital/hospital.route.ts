@@ -27,4 +27,28 @@ hospitalRouter.patch(
 	HospitalController.updateHospitalProfileController,
 );
 
+hospitalRouter.get(
+	"/all-hospital-profile",
+	auth(Role.ADMIN, Role.SUPER_ADMIN),
+	HospitalController.getAllHospitalProfileController,
+);
+
+hospitalRouter.get(
+	"/hospital-profile/:id",
+	auth(Role.ADMIN, Role.SUPER_ADMIN),
+	HospitalController.getHospitalProfileDetailsController,
+);
+
+hospitalRouter.put(
+	"/hospital-profile/:id",
+	auth(Role.ADMIN, Role.SUPER_ADMIN),
+	HospitalController.updateHospitalProfileStatusController,
+);
+
+hospitalRouter.delete(
+	"/hospital-profile/:id",
+	auth(Role.SUPER_ADMIN, Role.HOSPITAL),
+	HospitalController.deleteHospitalProfileController,
+);
+
 export default hospitalRouter;

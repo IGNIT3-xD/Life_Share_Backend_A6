@@ -8,7 +8,15 @@ import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import { validateUserById } from "../../utils/isUserExist";
 import type { IUser } from "../auth/auth.interface";
-import type { IDonor, IUpdateDonation, IUpdateDonor } from "./donor.interface";
+import type {
+	IDonationAdmin,
+	IDonor,
+	IDonorQuery,
+	IDonorQueryAdmin,
+	IUpdateDonation,
+	IUpdateDonor,
+	IUpdateDonorStatus,
+} from "./donor.interface";
 
 const createDonorProfileService = async (payload: IDonor, user: IUser) => {
 	const isUserExist = await validateUserById(user.userId);
@@ -44,22 +52,112 @@ const createDonorProfileService = async (payload: IDonor, user: IUser) => {
 	return donor;
 };
 
-const getAllDonorsService = async () => {
-	const donor = await prisma.donor.findMany();
+const getAllDonorsService = async (query: IDonorQuery) => {
+	const {
+		search,
+		blood_group,
+		availability,
+		location,
+		sortBy = "desc",
+		page = 1,
+		limit = 10,
+	} = query;
 
-	return donor;
+	const where: Record<string, unknown> = {
+		donorStatus: DonorStatus.VERIFIED,
+	};
+
+	if (blood_group) {
+		where.blood_group = blood_group;
+	}
+
+	if (availability) {
+		where.availability = availability;
+	}
+
+	if (location) {
+		where.location = { contains: location, mode: "insensitive" };
+	}
+
+	if (search) {
+		where.OR = [
+			{ location: { contains: search, mode: "insensitive" } },
+			{ user: { name: { contains: search, mode: "insensitive" } } },
+			{ user: { email: { contains: search, mode: "insensitive" } } },
+		];
+	}
+
+	const skip = (page - 1) * limit;
+
+	const [donors, total] = await Promise.all([
+		prisma.donor.findMany({
+			where,
+			skip,
+			take: limit,
+			include: {
+				user: { omit: { password: true } },
+			},
+			orderBy: { created_at: sortBy },
+		}),
+		prisma.donor.count({ where }),
+	]);
+
+	return {
+		donors,
+		meta: {
+			total,
+			page,
+			limit,
+			totalPages: Math.ceil(total / limit),
+		},
+	};
 };
 
-const getDonationRequestService = async (user: IUser) => {
-	const donation = await prisma.donation.findMany({
-		where: {
-			donor: {
-				userId: user.userId,
-			},
-		},
-	});
+const getDonationRequestService = async (user: IUser, query: IDonationAdmin) => {
+	const { urgency, blood_group, donationStatus, sortBy = "desc", page = 1, limit = 10, } = query;
 
-	return donation;
+	const where: Record<string, unknown> = {
+		donor: {
+			userId: user.userId,
+		}
+	}
+
+	if (donationStatus) {
+		where.donationStatus = donationStatus
+	}
+
+	if (urgency) {
+		where.requester = {
+			urgency: urgency,
+		};
+	}
+
+	if (blood_group) {
+		where.requester = { blood_group }
+	}
+
+	const skip = (page - 1) * limit;
+
+	const [donation, total] = await Promise.all([
+		prisma.donation.findMany({
+			where,
+			skip,
+			take: limit,
+			include: { requester: true },
+			orderBy: { created_at: sortBy }
+		}),
+		prisma.donation.count({ where })
+	])
+
+	return {
+		donation,
+		meta: {
+			total,
+			page,
+			limit,
+			totalPages: Math.ceil(total / limit),
+		}
+	};
 };
 
 const getDetailsDonationRequestService = async (
@@ -251,6 +349,115 @@ const getDonorRequestService = async (user: IUser) => {
 	return donations;
 };
 
+// Admin Controlled
+const adminGetAllDonorsService = async (query: IDonorQueryAdmin) => {
+	const {
+		search,
+		blood_group,
+		availability,
+		donorStatus,
+		location,
+		sortBy = "desc",
+		page = 1,
+		limit = 10,
+	} = query;
+
+	const where: Record<string, unknown> = {};
+
+	if (blood_group) {
+		where.blood_group = blood_group;
+	}
+
+	if (availability) {
+		where.availability = availability;
+	}
+
+	if (donorStatus) {
+		where.donorStatus = donorStatus;
+	}
+
+	if (location) {
+		where.location = { contains: location, mode: "insensitive" };
+	}
+
+	if (search) {
+		where.OR = [
+			{ location: { contains: search, mode: "insensitive" } },
+			{ user: { name: { contains: search, mode: "insensitive" } } },
+			{ user: { email: { contains: search, mode: "insensitive" } } },
+		];
+	}
+
+	const skip = (page - 1) * limit;
+
+	const [donors, total] = await Promise.all([
+		prisma.donor.findMany({
+			where,
+			skip,
+			take: limit,
+			include: {
+				user: { omit: { password: true } },
+			},
+			orderBy: { created_at: sortBy },
+		}),
+		prisma.donor.count({ where }),
+	]);
+
+	return {
+		donors,
+		meta: {
+			total,
+			page,
+			limit,
+			totalPages: Math.ceil(total / limit),
+		},
+	};
+}
+
+const updateDonorProfileStatusService = async (
+	donor_id: string,
+	payload: IUpdateDonorStatus,
+) => {
+	const donor = await prisma.donor.findUnique({
+		where: { id: donor_id },
+	});
+
+	if (!donor) {
+		throw new AppError(404, "Donor profile not found.");
+	}
+
+	const updateDonorProfile = await prisma.donor.update({
+		where: {
+			id: donor.id
+		},
+		data: {
+			donorStatus: payload.donorStatus,
+		},
+	});
+
+	return updateDonorProfile;
+};
+
+const deleteDonorProfileService = async (user: IUser, id: string) => {
+	const donor = await prisma.donor.findUnique({
+		where: { id },
+	});
+
+	if (!donor) {
+		throw new AppError(404, "Donor profile not found.");
+	}
+
+	if (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN') {
+		if (donor.userId !== user.userId) {
+			throw new AppError(403, "Unauthorized access.")
+		}
+	}
+
+	await prisma.donor.delete({
+		where: { id }
+	});
+};
+
 export const DonorService = {
 	createDonorProfileService,
 	getAllDonorsService,
@@ -260,4 +467,7 @@ export const DonorService = {
 	getDonorProfileService,
 	updateDonorProfileService,
 	getDonorRequestService,
+	updateDonorProfileStatusService,
+	adminGetAllDonorsService,
+	deleteDonorProfileService
 };

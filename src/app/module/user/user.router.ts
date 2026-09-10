@@ -25,26 +25,26 @@ userRouter.get("/requester", UserController.getAllRequesterController);
 
 userRouter.get(
 	"/my-request",
-	auth(Role.USER),
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
 	UserController.getMyRequestController,
 );
 
 userRouter.get(
 	"/my-request/:id",
-	auth(Role.USER),
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
 	UserController.getMyRequestDetailsController,
 );
 
 userRouter.patch(
 	"/update-my-request/:id",
-	auth(Role.USER),
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
 	validateRequest(UserValidation.updateMyRequestValidationSchema),
 	UserController.updateMyRequestController,
 );
 
 userRouter.delete(
 	"/delete-my-request/:id",
-	auth(Role.USER),
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
 	UserController.deleteMyRequestController,
 );
 
@@ -54,6 +54,24 @@ userRouter.patch(
 	upload.single("profile_pic"),
 	validateRequest(UserValidation.updateUserValidation),
 	UserController.updateProfileController,
+);
+
+userRouter.get(
+	"/all-users",
+	auth(Role.SUPER_ADMIN, Role.ADMIN),
+	UserController.getAllUserController,
+);
+
+userRouter.put(
+	"/:id",
+	auth(Role.SUPER_ADMIN, Role.ADMIN),
+	UserController.updateUserStatusController,
+);
+
+userRouter.delete(
+	"/:id",
+	auth(Role.SUPER_ADMIN),
+	UserController.deleteUserController,
 );
 
 export default userRouter;
