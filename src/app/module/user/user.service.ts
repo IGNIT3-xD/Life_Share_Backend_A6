@@ -296,12 +296,12 @@ const getAllUser = async (query: IUserQuery) => {
 		where.gender = gender
 	}
 
-	if (is_active) {
-		where.is_active = is_active
+	if (is_active !== undefined) {
+		where.is_active = is_active === true
 	}
 
-	if (is_blocked) {
-		where.is_blocked = is_active
+	if (is_blocked !== undefined) {
+		where.is_blocked = is_blocked === true
 	}
 
 	if (role) {
@@ -317,7 +317,7 @@ const getAllUser = async (query: IUserQuery) => {
 			skip,
 			orderBy: { created_at: sortBy }
 		}),
-		prisma.user.count()
+		prisma.user.count({ where })
 	])
 
 	return {
@@ -329,7 +329,7 @@ const getAllUser = async (query: IUserQuery) => {
 			totalPages: Math.ceil(total / limit)
 		}
 	}
-}
+};
 
 const updateUserStatus = async (id: string, payload: IUpdateProfileStatus) => {
 	const user = await prisma.user.findUnique({ where: { id } })
@@ -347,7 +347,7 @@ const updateUserStatus = async (id: string, payload: IUpdateProfileStatus) => {
 	})
 
 	return updateUser
-}
+};
 
 const deleteUser = async (id: string) => {
 	const user = await prisma.user.findUnique({ where: { id } })
@@ -359,7 +359,7 @@ const deleteUser = async (id: string) => {
 	await prisma.user.delete({
 		where: { id },
 	})
-}
+};
 
 export const UserService = {
 	getMeService,

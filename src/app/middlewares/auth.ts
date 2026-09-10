@@ -52,9 +52,9 @@ export const auth = (...requiredRoles: Role[]) => {
 				throw new AppError(404, "User not found. Please log in again.");
 			}
 
-			if (!user.is_active && user.is_blocked) {
+			if (!user.is_active || user.is_blocked) {
 				throw new Error(
-					"Your account has been blocked. Please contact support.",
+					"Your account has been blocked or not active. Please contact support.",
 				);
 			}
 

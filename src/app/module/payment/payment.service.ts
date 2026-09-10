@@ -8,6 +8,7 @@ import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import { validateUserById } from "../../utils/isUserExist";
 import type { IUser } from "../user/user.interface";
+import type { IPaymentQuery } from "./payment.interface";
 
 const createPayemntService = async (user: IUser, booking_id: string) => {
 	const userData = await validateUserById(user.userId);
@@ -120,7 +121,7 @@ const createPayemntService = async (user: IUser, booking_id: string) => {
 	return result;
 };
 
-const createPaymentCallbackService = async (query: Record<string, any>) => {
+const createPaymentCallbackService = async (query: Record<string, unknown>) => {
 	const paymentId = query.paymentID;
 	const status = query.status;
 
@@ -270,7 +271,140 @@ const createPaymentCallbackService = async (query: Record<string, any>) => {
 	return result;
 };
 
+const getMyPayments = async (user: IUser, query: IPaymentQuery) => {
+	const { search, payment_status, payment_gateway, sortByAmount = 'desc', sortBy = 'desc', limit = 10, page = 1 } = query
+
+	const where: Record<string, unknown> = {
+		user_id: user.userId
+	}
+
+	if (search) {
+		where.OR = [
+			{ merchant_invoice_number: { contains: search, mode: "insensitive" } },
+			{ payer_reference: { contains: search, mode: "insensitive" } },
+			{ bkash_trx_id: { contains: search, mode: "insensitive" } },
+		]
+	}
+
+	if (payment_status) {
+		where.payment_status = payment_status
+	}
+
+	if (payment_gateway) {
+		where.payment_gateway = payment_gateway
+	}
+
+	const skip = (page - 1) * limit
+
+	const orderBy = sortByAmount ? { payment_amount: sortByAmount } : { created_at: sortBy }
+
+	const [payment, total] = await Promise.all([
+		prisma.payment.findMany({
+			where,
+			skip,
+			take: limit,
+			orderBy
+		}),
+		prisma.payment.count()
+	])
+
+	if (!payment) {
+		throw new AppError(404, "No payment found.")
+	}
+
+	return {
+		payment,
+		meta: {
+			total,
+			page,
+			limit,
+			totalPages: Math.ceil(total / limit)
+		}
+	}
+}
+
+// Admin Controlled
+const getAllPayments = async (query: IPaymentQuery) => {
+	const { search, payment_status, payment_gateway, sortByAmount = 'desc', sortBy = 'desc', limit = 10, page = 1 } = query
+
+	const where: Record<string, unknown> = {}
+
+	if (search) {
+		where.OR = [
+			{ merchant_invoice_number: { contains: search, mode: "insensitive" } },
+			{ payer_reference: { contains: search, mode: "insensitive" } },
+			{ bkash_trx_id: { contains: search, mode: "insensitive" } },
+		]
+	}
+
+	if (payment_status) {
+		where.payment_status = payment_status
+	}
+
+	if (payment_gateway) {
+		where.payment_gateway = payment_gateway
+	}
+
+	const skip = (page - 1) * limit
+
+	const orderBy = sortByAmount ? { payment_amount: sortByAmount } : { created_at: sortBy }
+
+	const [payment, total] = await Promise.all([
+		prisma.payment.findMany({
+			where,
+			skip,
+			take: limit,
+			orderBy
+		}),
+		prisma.payment.count()
+	])
+
+	if (!payment) {
+		throw new AppError(404, "No payment found.")
+	}
+
+	return {
+		payment,
+		meta: {
+			total,
+			page,
+			limit,
+			totalPages: Math.ceil(total / limit)
+		}
+	}
+}
+
+const getPaymentDetails = async (id: string, user: IUser) => {
+	const payment = await prisma.payment.findUnique({
+		where: { id },
+		include: {
+			emergencyService: true,
+			user: {
+				omit: {
+					password: true
+				}
+			}
+		}
+	})
+
+	if (!payment) {
+		throw new AppError(404, "No payment found.")
+	}
+
+
+	if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+		if (payment.user_id !== user.userId) {
+			throw new AppError(403, "Unauthorize access.")
+		}
+	}
+
+	return payment
+}
+
 export const PaymentService = {
 	createPayemntService,
 	createPaymentCallbackService,
+	getMyPayments,
+	getAllPayments,
+	getPaymentDetails
 };

@@ -141,11 +141,11 @@ const verifyEmailService = async (payload: IVerifyRegisterOtp) => {
 	const redisOtp = await redisClient.get(otpKey);
 
 	if (!redisOtp) {
-		throw new Error("No OTP found");
+		throw new AppError(404, "No OTP found");
 	}
 
 	if (redisOtp !== otp) {
-		throw new Error("Invalid OTP !!!");
+		throw new AppError(404, "Invalid OTP !!!");
 	}
 
 	await redisClient.del([otpKey]);

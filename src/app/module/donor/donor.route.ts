@@ -39,6 +39,7 @@ donorRouter.patch(
 
 donorRouter.get(
 	"/donor-profile/:id",
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL),
 	DonorController.getDonorProfileController,
 );
 

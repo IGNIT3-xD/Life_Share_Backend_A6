@@ -30,7 +30,51 @@ const createPaymentCallbackController = catchAsync(
 	},
 );
 
+const getMyPaymentsController = catchAsync(
+	async (req: Request, res: Response) => {
+		const user = req.user as IUser
+
+		const result = await PaymentService.getMyPayments(user, req.query);
+
+		sendResponse(res, {
+			success: true,
+			statusCode: 201,
+			message: "Payments retrieved successfully",
+			data: result,
+		});
+	},
+);
+
+const getAllPaymentsController = catchAsync(
+	async (req: Request, res: Response) => {
+		const result = await PaymentService.getAllPayments(req.query);
+
+		sendResponse(res, {
+			success: true,
+			statusCode: 201,
+			message: "Payments retrieved successfully",
+			data: result,
+		});
+	},
+);
+
+const getPaymentDetailsController = catchAsync(
+	async (req: Request, res: Response) => {
+		const result = await PaymentService.getPaymentDetails(req.params.id as string, req.user as IUser);
+
+		sendResponse(res, {
+			success: true,
+			statusCode: 201,
+			message: "Payment details retrieved successfully",
+			data: result,
+		});
+	},
+);
+
 export const PaymentController = {
 	createPaymentController,
 	createPaymentCallbackController,
-};
+	getMyPaymentsController,
+	getAllPaymentsController,
+	getPaymentDetailsController
+};	
