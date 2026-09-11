@@ -23,12 +23,13 @@ userRouter.post(
 
 userRouter.get("/requester", UserController.getAllRequesterController);
 
-userRouter.get("/all-requesters", auth(Role.SUPER_ADMIN, Role.ADMIN), UserController.getAllRequesterAdminController);
-
 userRouter.get(
-	"/request/:id",
-	UserController.getMyRequestDetailsController,
+	"/all-requesters",
+	auth(Role.SUPER_ADMIN, Role.ADMIN),
+	UserController.getAllRequesterAdminController,
 );
+
+userRouter.get("/request/:id", UserController.getMyRequestDetailsController);
 
 userRouter.patch(
 	"/update-my-request/:id",

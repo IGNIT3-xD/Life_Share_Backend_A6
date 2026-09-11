@@ -19,7 +19,9 @@ const createDonationController = catchAsync(
 
 const getMyDonationRequestController = catchAsync(
 	async (req: Request, res: Response) => {
-		const result = await DonationService.getMyDonationRequestService(req.user as IUser);
+		const result = await DonationService.getMyDonationRequestService(
+			req.user as IUser,
+		);
 
 		sendResponse(res, {
 			statusCode: 200,
@@ -32,7 +34,10 @@ const getMyDonationRequestController = catchAsync(
 
 const getDonationRequestDetailsController = catchAsync(
 	async (req: Request, res: Response) => {
-		const result = await DonationService.getDonationRequestDetailsService(req.user as IUser, req.params.id as string);
+		const result = await DonationService.getDonationRequestDetailsService(
+			req.user as IUser,
+			req.params.id as string,
+		);
 
 		sendResponse(res, {
 			statusCode: 200,
@@ -46,5 +51,5 @@ const getDonationRequestDetailsController = catchAsync(
 export const DonationController = {
 	createDonationController,
 	getMyDonationRequestController,
-	getDonationRequestDetailsController
+	getDonationRequestDetailsController,
 };

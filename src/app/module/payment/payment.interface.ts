@@ -14,5 +14,7 @@ export interface IPaymentQuery {
 }
 
 export interface IPaymentStatus {
-	payment_status: PaymentStatus;
+	payment_status?: PaymentStatus;
+	refund_amount?: number;
+	refunded_at?: Date;
 }

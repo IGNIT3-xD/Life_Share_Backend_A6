@@ -341,7 +341,7 @@ const getAllServiceAdmin = async (query: IServiceQuery) => {
 	}
 
 	if (service_status) {
-		where.service_status = service_status
+		where.service_status = service_status;
 	}
 
 	const skip = (page - 1) * limit;
@@ -376,24 +376,27 @@ const getAllServiceAdmin = async (query: IServiceQuery) => {
 	};
 };
 
-const updateServiceStatus = async (id: string, payload: IUpdateServiceStatus) => {
+const updateServiceStatus = async (
+	id: string,
+	payload: IUpdateServiceStatus,
+) => {
 	const service = await prisma.emergencyService.findUnique({
-		where: { id }
-	})
+		where: { id },
+	});
 
 	if (!service) {
-		throw new AppError(400, "No service found.")
+		throw new AppError(400, "No service found.");
 	}
 
 	const updateServiceStatus = await prisma.emergencyService.update({
 		where: { id },
 		data: {
-			service_status: payload.service_status
-		}
-	})
+			service_status: payload.service_status,
+		},
+	});
 
-	return updateServiceStatus
-}
+	return updateServiceStatus;
+};
 
 export const EmergencyService = {
 	createService,
@@ -403,5 +406,5 @@ export const EmergencyService = {
 	updateMyService,
 	deleteMyService,
 	getAllServiceAdmin,
-	updateServiceStatus
+	updateServiceStatus,
 };

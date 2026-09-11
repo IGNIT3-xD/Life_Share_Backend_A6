@@ -126,7 +126,7 @@ const updateServiceStatusController = catchAsync(
 			statusCode: 200,
 			success: true,
 			message: "Emergency service status updated successfully",
-			data: result
+			data: result,
 		});
 	},
 );
@@ -139,5 +139,5 @@ export const EmergencyServiceController = {
 	updateMyServicesController,
 	deleteMyServicesController,
 	getAllServiceAdminController,
-	updateServiceStatusController
+	updateServiceStatusController,
 };

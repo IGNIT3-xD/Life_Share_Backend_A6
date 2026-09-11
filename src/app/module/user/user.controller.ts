@@ -154,16 +154,21 @@ const deleteUserController = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
-const updateRequesterController = catchAsync(async (req: Request, res: Response) => {
-	const result = await UserService.updateRequester(req.params.id as string, req.body);
+const updateRequesterController = catchAsync(
+	async (req: Request, res: Response) => {
+		const result = await UserService.updateRequester(
+			req.params.id as string,
+			req.body,
+		);
 
-	sendResponse(res, {
-		statusCode: 200,
-		success: true,
-		message: "Requester status updated successfully",
-		data: result
-	});
-});
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "Requester status updated successfully",
+			data: result,
+		});
+	},
+);
 
 const getAllRequesterAdminController = catchAsync(
 	async (req: Request, res: Response) => {
@@ -178,7 +183,6 @@ const getAllRequesterAdminController = catchAsync(
 	},
 );
 
-
 export const UserController = {
 	getMeController,
 	makeBloodRequestController,
@@ -191,5 +195,5 @@ export const UserController = {
 	updateUserStatusController,
 	deleteUserController,
 	updateRequesterController,
-	getAllRequesterAdminController
+	getAllRequesterAdminController,
 };

@@ -1,4 +1,7 @@
-import { BookingStatus, PaymentStatus } from "../../../../prisma/generated/prisma/enums";
+import {
+	BookingStatus,
+	PaymentStatus,
+} from "../../../../prisma/generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import { validateUserById } from "../../utils/isUserExist";
@@ -245,7 +248,7 @@ const cancelBookingService = async (user: IUser, booking_id: string) => {
 		throw new AppError(400, `Booking is already cancelled.`);
 	}
 
-	const requiresRefund = booking.payment_status === 'PAID';
+	const requiresRefund = booking.payment_status === "PAID";
 
 	const result = await prisma.$transaction(async (tx) => {
 		const bookingUpdateData: any = {
@@ -266,11 +269,11 @@ const cancelBookingService = async (user: IUser, booking_id: string) => {
 		if (requiresRefund) {
 			await tx.payment.update({
 				where: {
-					merchant_invoice_number: booking.id
+					merchant_invoice_number: booking.id,
 				},
 				data: {
-					payment_status: PaymentStatus.REFUNDED_PENDING
-				}
+					payment_status: PaymentStatus.REFUNDED_PENDING,
+				},
 			});
 		}
 
@@ -348,8 +351,8 @@ const updateBookingStatusService = async (
 		throw new AppError(403, "Unauthorized access");
 	}
 
-	if (booking.booking_status === 'COMPLETED') {
-		throw new AppError(400, "Booking is already completed.")
+	if (booking.booking_status === "COMPLETED") {
+		throw new AppError(400, "Booking is already completed.");
 	}
 
 	const updateBookingStatus = await prisma.bookingService.update({
@@ -357,7 +360,7 @@ const updateBookingStatusService = async (
 			id: booking.id,
 		},
 		data: {
-			booking_status: payload.booking_status
+			booking_status: payload.booking_status,
 		},
 	});
 
@@ -401,12 +404,15 @@ const updatePaymentStatusService = async (
 		throw new AppError(403, "Unauthorized access");
 	}
 
-	if (booking.booking_status === 'COMPLETED') {
-		throw new AppError(400, "Booking is already completed.")
+	if (booking.booking_status === "COMPLETED") {
+		throw new AppError(400, "Booking is already completed.");
 	}
 
-	if (booking.booking_status !== 'CANCELLED') {
-		throw new AppError(400, "You can't update payment status of booking which is not cancelled.")
+	if (booking.booking_status !== "CANCELLED") {
+		throw new AppError(
+			400,
+			"You can't update payment status of booking which is not cancelled.",
+		);
 	}
 
 	const result = await prisma.$transaction(async (tx) => {
@@ -421,15 +427,15 @@ const updatePaymentStatusService = async (
 
 		const payment = await tx.payment.update({
 			where: {
-				merchant_invoice_number: booking.id
+				merchant_invoice_number: booking.id,
 			},
 			data: {
-				payment_status: payload.payment_status
-			}
-		})
+				payment_status: payload.payment_status,
+			},
+		});
 
-		return payment
-	})
+		return payment;
+	});
 
 	return result;
 };
@@ -449,11 +455,11 @@ const getBookingRequestsService = async (
 	const where: Record<string, unknown> = { hospital_id: hospitalProfile.id };
 
 	if (query?.booking_status) {
-		where.booking_status = query.booking_status
+		where.booking_status = query.booking_status;
 	}
 
 	if (query?.payment_status) {
-		where.payment_status = query.payment_status
+		where.payment_status = query.payment_status;
 	}
 
 	const page = Math.max(1, Number(query?.page) || 1);
@@ -526,5 +532,5 @@ export const BookingService = {
 	updateBookingStatusService,
 	getBookingRequestsService,
 	getBookingRequestsDetailsService,
-	updatePaymentStatusService
+	updatePaymentStatusService,
 };

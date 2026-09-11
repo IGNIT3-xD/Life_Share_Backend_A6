@@ -16,7 +16,8 @@ export const getBkashIdToken = async () => {
 		const TTLBkashRefreshToken = await redisClient.ttl(refreshTokenKey);
 
 		// If bkash id token's not found or time has less than 10 mints and bkash refresh token time has more than 10 mints
-		if ((!bkashIdToken || TTLBkashIdToken < 600) &&
+		if (
+			(!bkashIdToken || TTLBkashIdToken < 600) &&
 			bkashRefreshToken &&
 			TTLBkashRefreshToken > 600
 		) {
@@ -114,7 +115,6 @@ export const getBkashIdToken = async () => {
 
 			bkashIdToken = result.id_token;
 			return bkashIdToken;
-
 		} finally {
 			refreshInProgress = false;
 		}

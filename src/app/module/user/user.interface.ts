@@ -83,5 +83,5 @@ export interface IUpdateProfileStatus {
 }
 
 export interface IUpdateRequester {
-	verificationStatus: VerificationStatus
+	verificationStatus: VerificationStatus;
 }

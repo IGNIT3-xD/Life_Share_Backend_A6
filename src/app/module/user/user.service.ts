@@ -125,8 +125,8 @@ const getMyRequestDetailsService = async (request_id: string) => {
 		},
 		include: {
 			user: {
-				omit: { password: true }
-			}
+				omit: { password: true },
+			},
 		},
 	});
 
@@ -381,20 +381,20 @@ const deleteUser = async (id: string) => {
 };
 
 const updateRequester = async (id: string, payload: IUpdateRequester) => {
-	const requester = await prisma.requester.findUnique({ where: { id } })
+	const requester = await prisma.requester.findUnique({ where: { id } });
 
 	if (!requester) {
-		throw new AppError(404, "No requester found.")
+		throw new AppError(404, "No requester found.");
 	}
 
 	const verifyRequester = await prisma.requester.update({
 		where: { id },
 		data: {
-			verificationStatus: payload.verificationStatus
-		}
-	})
+			verificationStatus: payload.verificationStatus,
+		},
+	});
 
-	return verifyRequester
+	return verifyRequester;
 };
 
 const getAllRequesterAdmin = async (query: IRequesterQueryAdmin) => {
@@ -467,5 +467,5 @@ export const UserService = {
 	updateUserStatus,
 	deleteUser,
 	updateRequester,
-	getAllRequesterAdmin
+	getAllRequesterAdmin,
 };

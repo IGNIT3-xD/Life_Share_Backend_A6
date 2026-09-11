@@ -429,7 +429,7 @@ const getPaymentDetails = async (id: string, user: IUser) => {
 	return payment;
 };
 
-// Hospital Controlled 
+// Hospital Controlled
 const getAllPaymentsHospital = async (query: IPaymentQuery, user: IUser) => {
 	const {
 		search,
@@ -446,9 +446,9 @@ const getAllPaymentsHospital = async (query: IPaymentQuery, user: IUser) => {
 	const where: Record<string, unknown> = {
 		emergencyService: {
 			hospital: {
-				user_id: user.userId
-			}
-		}
+				user_id: user.userId,
+			},
+		},
 	};
 
 	if (search) {
@@ -502,72 +502,65 @@ const getAllPaymentsHospital = async (query: IPaymentQuery, user: IUser) => {
 const updatePaymentStatus = async (id: string, payload: IPaymentStatus) => {
 	const payment = await prisma.payment.findUnique({
 		where: { id },
-		include: {
-			emergencyService: {
-				include: {
-					bookingServices: true
-				}
-			}
-		}
 	});
 
 	if (!payment) {
-		throw new AppError(404, "No payment found.");
+		throw new AppError(404, "No payment record found.");
 	}
 
 	const booking = await prisma.bookingService.findUnique({
 		where: {
-			id: payment.merchant_invoice_number as string
-		}
-	})
+			id: payment.merchant_invoice_number as string,
+		},
+	});
 
 	if (!booking) {
-		throw new AppError(404, "Booking not found.")
+		throw new AppError(404, "Associated booking record not found.");
 	}
 
-	if (booking.booking_status !== 'CANCELLED') {
-		throw new AppError(400, "You can't update payment status of booking which is not cancelled yet.")
+	if (booking.booking_status !== "CANCELLED") {
+		throw new AppError(
+			400,
+			"You cannot update the payment status of a booking that is not cancelled yet.",
+		);
+	}
+
+	if (
+		payment.payment_status === "REFUNDED" &&
+		payload.payment_status === "REFUNDED"
+	) {
+		throw new AppError(
+			400,
+			"Payment has already been successfully refunded for this booking.",
+		);
 	}
 
 	const result = await prisma.$transaction(async (tx) => {
-		const updateStatus = await tx.payment.update({
-			where: {
-				id
-			},
-			data: {
-				payment_status: payload.payment_status
-			}
-		})
+		const paymentUpdateData: IPaymentStatus = {
+			payment_status: payload.payment_status,
+		};
 
-		if (updateStatus.payment_status === 'REFUNDED') {
-			await tx.bookingService.update({
-				where: { id: booking.id },
-				data: {
-					payment_status: 'REFUNDED'
-				}
-			})
+		const bookingUpdateData: IPaymentStatus = {
+			payment_status: payload.payment_status,
+		};
+
+		if (payload.payment_status === "REFUNDED") {
+			paymentUpdateData.refund_amount = Number(payment.payment_amount);
+			paymentUpdateData.refunded_at = new Date();
 		}
 
-		else if (updateStatus.payment_status === 'REFUNDED_PENDING') {
-			await tx.bookingService.update({
-				where: { id: booking.id },
-				data: {
-					payment_status: 'REFUNDED_PENDING'
-				}
-			})
-		}
+		const updatedPayment = await tx.payment.update({
+			where: { id },
+			data: paymentUpdateData,
+		});
 
-		else if (updateStatus.payment_status === 'CANCELLED') {
-			await tx.bookingService.update({
-				where: { id: booking.id },
-				data: {
-					payment_status: 'CANCELLED'
-				}
-			})
-		}
+		await tx.bookingService.update({
+			where: { id: booking.id },
+			data: bookingUpdateData,
+		});
 
-		return updateStatus
-	})
+		return updatedPayment;
+	});
 
 	return result;
 };
@@ -579,5 +572,5 @@ export const PaymentService = {
 	getAllPayments,
 	getPaymentDetails,
 	getAllPaymentsHospital,
-	updatePaymentStatus
+	updatePaymentStatus,
 };

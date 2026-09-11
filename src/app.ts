@@ -10,6 +10,7 @@ import hospitalRouter from "./app/module/hospital/hospital.route";
 import serviceRouter from "./app/module/emergencyService/service.router";
 import bookingRouter from "./app/module/booking/booking.router";
 import paymentRouter from "./app/module/payment/payment.router";
+import analyticsRouter from "./app/module/analytics/analytics.router";
 import config from "./app/config";
 import cors from "cors";
 import AppError from "./app/utils/AppError";
@@ -55,6 +56,7 @@ app.use("/api/v1/hospital", hospitalRouter);
 app.use("/api/v1/emergency-service", serviceRouter);
 app.use("/api/v1/emergency-service-booking", bookingRouter);
 app.use("/api/v1/payment", paymentRouter);
+app.use("/api/v1/analytics", analyticsRouter);
 
 app.use(globalErrorHandler);
 

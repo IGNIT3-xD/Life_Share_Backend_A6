@@ -18,7 +18,11 @@ serviceRouter.post(
 
 serviceRouter.get("/", EmergencyServiceController.getAllServiceController);
 
-serviceRouter.get("/admin", auth(Role.SUPER_ADMIN, Role.ADMIN), EmergencyServiceController.getAllServiceAdminController);
+serviceRouter.get(
+	"/admin",
+	auth(Role.SUPER_ADMIN, Role.ADMIN),
+	EmergencyServiceController.getAllServiceAdminController,
+);
 
 serviceRouter.get(
 	"/my-services",

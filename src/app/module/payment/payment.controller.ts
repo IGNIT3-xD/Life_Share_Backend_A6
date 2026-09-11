@@ -60,7 +60,10 @@ const getAllPaymentsController = catchAsync(
 
 const getAllPaymentsHospitalController = catchAsync(
 	async (req: Request, res: Response) => {
-		const result = await PaymentService.getAllPaymentsHospital(req.query, req.user as IUser);
+		const result = await PaymentService.getAllPaymentsHospital(
+			req.query,
+			req.user as IUser,
+		);
 
 		sendResponse(res, {
 			success: true,
@@ -89,7 +92,10 @@ const getPaymentDetailsController = catchAsync(
 
 const updatePaymentStatusController = catchAsync(
 	async (req: Request, res: Response) => {
-		const result = await PaymentService.updatePaymentStatus(req.params.id as string, req.body);
+		const result = await PaymentService.updatePaymentStatus(
+			req.params.id as string,
+			req.body,
+		);
 
 		sendResponse(res, {
 			success: true,
@@ -107,5 +113,5 @@ export const PaymentController = {
 	getAllPaymentsController,
 	getPaymentDetailsController,
 	getAllPaymentsHospitalController,
-	updatePaymentStatusController
+	updatePaymentStatusController,
 };

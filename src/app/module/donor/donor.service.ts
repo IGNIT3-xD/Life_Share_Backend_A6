@@ -53,7 +53,7 @@ const createDonorProfileService = async (payload: IDonor, user: IUser) => {
 };
 
 const getMyDonorProfileService = async (user: IUser) => {
-	const userData = await validateUserById(user.userId)
+	const userData = await validateUserById(user.userId);
 
 	const donorProfile = await prisma.donor.findUnique({
 		where: {
@@ -61,17 +61,17 @@ const getMyDonorProfileService = async (user: IUser) => {
 		},
 		include: {
 			user: {
-				omit: { password: true }
-			}
-		}
-	})
+				omit: { password: true },
+			},
+		},
+	});
 
 	if (!donorProfile) {
-		throw new AppError(404, "Donor profile not found.")
+		throw new AppError(404, "Donor profile not found.");
 	}
 
-	return donorProfile
-}
+	return donorProfile;
+};
 
 const getAllDonorsService = async (query: IDonorQuery) => {
 	const {
@@ -209,10 +209,10 @@ const getDetailsDonationRequestService = async (
 			requester: {
 				include: {
 					user: {
-						omit: { password: true }
-					}
-				}
-			}
+						omit: { password: true },
+					},
+				},
+			},
 		},
 	});
 
@@ -257,8 +257,8 @@ const updateDonationRequestService = async (
 		);
 	}
 
-	if (donation.donationStatus === 'COMPLETED') {
-		throw new AppError(400, "This request is already completed.")
+	if (donation.donationStatus === "COMPLETED") {
+		throw new AppError(400, "This request is already completed.");
 	}
 
 	const result = await prisma.$transaction(async (tx) => {

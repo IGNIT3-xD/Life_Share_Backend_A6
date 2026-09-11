@@ -83,36 +83,36 @@ const createDonationService = async (payload: IDonation) => {
 };
 
 const getMyDonationRequestService = async (user: IUser) => {
-	const userData = await validateUserById(user.userId)
+	const userData = await validateUserById(user.userId);
 
 	const donationRequest = await prisma.donation.findMany({
 		where: {
 			requester: {
-				user_id: userData.id
-			}
+				user_id: userData.id,
+			},
 		},
 		include: {
 			donor: true,
-			requester: true
-		}
-	})
+			requester: true,
+		},
+	});
 
 	if (!donationRequest) {
-		throw new AppError(404, "Donation requests not found.")
+		throw new AppError(404, "Donation requests not found.");
 	}
 
-	return donationRequest
+	return donationRequest;
 };
 
 const getDonationRequestDetailsService = async (
 	user: IUser,
 	donation_id: string,
 ) => {
-	const userData = await validateUserById(user.userId)
+	const userData = await validateUserById(user.userId);
 
 	const donation = await prisma.donation.findUnique({
 		where: {
-			id: donation_id
+			id: donation_id,
 		},
 		include: {
 			donor: true,
@@ -124,7 +124,8 @@ const getDonationRequestDetailsService = async (
 		throw new AppError(404, "Donation request not found.");
 	}
 
-	const isAdministrative = user.role === Role.ADMIN || user.role === Role.SUPER_ADMIN;
+	const isAdministrative =
+		user.role === Role.ADMIN || user.role === Role.SUPER_ADMIN;
 
 	if (!isAdministrative && donation.requester.user_id !== userData.id) {
 		throw new AppError(
@@ -139,5 +140,5 @@ const getDonationRequestDetailsService = async (
 export const DonationService = {
 	createDonationService,
 	getMyDonationRequestService,
-	getDonationRequestDetailsService
+	getDonationRequestDetailsService,
 };

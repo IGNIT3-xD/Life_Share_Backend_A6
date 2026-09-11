@@ -17,7 +17,7 @@ donorRouter.post(
 donorRouter.get(
 	"/my-donor-profile",
 	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
-	DonorController.getMyDonorProfileController
+	DonorController.getMyDonorProfileController,
 );
 
 donorRouter.get("/", DonorController.getAllDonorsController);
