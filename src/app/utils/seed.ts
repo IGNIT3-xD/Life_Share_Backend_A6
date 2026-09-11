@@ -23,7 +23,7 @@ export const seedSuperAdmin = async () => {
 		});
 
 		if (superAdmin) {
-			console.log("Super Admin is already exist!");
+			// console.log("Super Admin is already exist!");
 			return;
 		}
 
@@ -42,7 +42,7 @@ export const seedSuperAdmin = async () => {
 
 		const hashedPassword = await hashPassword(password);
 
-		const createSuperAdmin = await prisma.user.create({
+		await prisma.user.create({
 			data: {
 				name,
 				email,
@@ -54,7 +54,7 @@ export const seedSuperAdmin = async () => {
 			omit: { password: true },
 		});
 
-		console.log("Super Admin Has Been Created : ", createSuperAdmin);
+		// console.log("Super Admin Has Been Created : ", createSuperAdmin);
 	} catch (error) {
 		console.log("Error Seeding Super Admin : ", error);
 		try {
@@ -80,7 +80,7 @@ export const seedTesterAdmin = async () => {
 		});
 
 		if (testerAdmin) {
-			console.log("Tester Admin is already exist!");
+			// console.log("Tester Admin is already exist!");
 			return;
 		}
 
@@ -93,7 +93,7 @@ export const seedTesterAdmin = async () => {
 
 		const hashedPassword = await hashPassword(password);
 
-		const createTesterAdmin = await prisma.user.create({
+		await prisma.user.create({
 			data: {
 				name,
 				email,
@@ -105,7 +105,7 @@ export const seedTesterAdmin = async () => {
 			omit: { password: true },
 		});
 
-		console.log("Tester Admin Has Been Created : ", createTesterAdmin);
+		// console.log("Tester Admin Has Been Created : ", createTesterAdmin);
 	} catch (error) {
 		console.log("Error Seeding Tester Admin : ", error);
 		try {
@@ -131,7 +131,7 @@ export const seedTesterDonor = async () => {
 		});
 
 		if (testerDonor) {
-			console.log("Tester Donor is already exist!");
+			// console.log("Tester Donor is already exist!");
 			return;
 		}
 
@@ -144,7 +144,7 @@ export const seedTesterDonor = async () => {
 
 		const hashedPassword = await hashPassword(password);
 
-		const createTesterDonor = await prisma.user.create({
+		await prisma.user.create({
 			data: {
 				name,
 				email,
@@ -168,7 +168,7 @@ export const seedTesterDonor = async () => {
 			omit: { password: true },
 		});
 
-		console.log("Tester Donor Has Been Created : ", createTesterDonor);
+		// console.log("Tester Donor Has Been Created : ", createTesterDonor);
 	} catch (error) {
 		console.log("Error Seeding Tester Donor : ", error);
 		try {
@@ -194,7 +194,7 @@ export const seedTesterHospital = async () => {
 		});
 
 		if (testerHospital) {
-			console.log("Tester Hospital is already exist!");
+			// console.log("Tester Hospital is already exist!");
 			return;
 		}
 
@@ -207,7 +207,7 @@ export const seedTesterHospital = async () => {
 
 		const hashedPassword = await hashPassword(password);
 
-		const createTesterHospital = await prisma.user.create({
+		await prisma.user.create({
 			data: {
 				name,
 				email,
@@ -228,7 +228,7 @@ export const seedTesterHospital = async () => {
 			omit: { password: true },
 		});
 
-		console.log("Tester Admin Has Been Created : ", createTesterHospital);
+		// console.log("Tester Admin Has Been Created : ", createTesterHospital);
 	} catch (error) {
 		console.log("Error Seeding Tester Hospital : ", error);
 		try {
