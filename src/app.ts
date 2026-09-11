@@ -12,22 +12,36 @@ import bookingRouter from "./app/module/booking/booking.router";
 import paymentRouter from "./app/module/payment/payment.router";
 import config from "./app/config";
 import cors from "cors";
+import AppError from "./app/utils/AppError";
 
 const app: Application = express();
 
+const allowedOrigins = config.FRONTEND_URL
+	? config.FRONTEND_URL.split(",").map((o) => o.trim())
+	: ["http://localhost:3000"];
+
+// app.use(requestId);
+
 app.use(
 	cors({
-		origin: config.FRONTEND_URL,
+		origin: (origin, callback) => {
+			if (!origin || allowedOrigins.includes(origin)) {
+				callback(null, true);
+			} else {
+				callback(new AppError(403, "Not allowed by CORS"));
+			}
+		},
 		credentials: true,
 	}),
 );
 
-// Enable URL-encoded form data parsing
 app.use(express.urlencoded({ extended: true }));
-
-// Middleware to parse JSON bodies
 app.use(express.json());
 app.use(cookieParser());
+
+app.get("/health", (_req: Request, res: Response) => {
+	res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
 
 app.get("/", (_req: Request, res: Response) => {
 	res.send("Hello World!");

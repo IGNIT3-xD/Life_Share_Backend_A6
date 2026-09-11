@@ -4,7 +4,12 @@ import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import { validateUserById } from "../../utils/isUserExist";
 import type { IUser } from "../user/user.interface";
-import type { IService, IServiceQuery, IUpdateService } from "./service.interface";
+import type {
+	IService,
+	IServiceQuery,
+	IUpdateService,
+	IUpdateServiceStatus,
+} from "./service.interface";
 
 const createService = async (
 	user: IUser,
@@ -79,40 +84,49 @@ const createService = async (
 };
 
 const getAllService = async (query: IServiceQuery) => {
-	const { search, service_category, sortBy = "desc", sortByPrice, page = 1, limit = 10 } = query
+	const {
+		search,
+		service_category,
+		sortBy = "desc",
+		sortByPrice,
+		rawPage = 1,
+		rawLimit = 10,
+	} = query;
+
+	const page = Math.max(1, Number(rawPage));
+	const limit = Math.min(Math.max(1, Number(rawLimit)), 100);
 
 	const where: Record<string, unknown> = {
-		service_status: "ACTIVE"
-	}
+		service_status: "ACTIVE",
+	};
 
 	if (search) {
-		where.OR = [
-			{ service_name: { contains: search, mode: "insensitive" } }
-		];
+		where.OR = [{ service_name: { contains: search, mode: "insensitive" } }];
 	}
 
 	if (service_category) {
-		where.service_category = service_category
+		where.service_category = service_category;
 	}
 
 	const skip = (page - 1) * limit;
 
-	const orderBy = sortByPrice
-		? { price: sortByPrice }
-		: { created_at: sortBy };
+	const orderBy = sortByPrice ? { price: sortByPrice } : { created_at: sortBy };
 
 	const [services, total] = await Promise.all([
 		prisma.emergencyService.findMany({
 			where,
 			skip,
 			take: limit,
-			orderBy
+			orderBy,
 		}),
-		prisma.emergencyService.count({ where })
-	])
+		prisma.emergencyService.count({ where }),
+	]);
 
-	if (!services) {
-		throw new AppError(404, "No service found.");
+	if (services.length === 0) {
+		return {
+			services: [],
+			meta: { total: 0, page, limit, totalPages: 0 },
+		};
 	}
 
 	return {
@@ -121,8 +135,8 @@ const getAllService = async (query: IServiceQuery) => {
 			total,
 			page,
 			limit,
-			totalPages: Math.ceil(total / limit)
-		}
+			totalPages: Math.ceil(total / limit),
+		},
 	};
 };
 
@@ -156,27 +170,33 @@ const getServiceDetails = async (id: string) => {
 };
 
 const getMyServices = async (user: IUser, query: IServiceQuery) => {
-	const { search, service_category, sortBy = "desc", sortByPrice, page = 1, limit = 10 } = query
+	const {
+		search,
+		service_category,
+		sortBy = "desc",
+		sortByPrice,
+		rawPage = 1,
+		rawLimit = 10,
+	} = query;
+
+	const page = Math.max(1, Number(rawPage));
+	const limit = Math.min(Math.max(1, Number(rawLimit)), 100);
 
 	const where: Record<string, unknown> = {
 		hospital: {
 			user_id: user.userId,
-		}
-	}
+		},
+	};
 
 	if (search) {
-		where.OR = [
-			{ service_name: { contains: search, mode: "insensitive" } }
-		];
+		where.OR = [{ service_name: { contains: search, mode: "insensitive" } }];
 	}
 
 	if (service_category) {
-		where.service_category = service_category
+		where.service_category = service_category;
 	}
 
-	const orderBy = sortByPrice
-		? { price: sortByPrice }
-		: { created_at: sortBy };
+	const orderBy = sortByPrice ? { price: sortByPrice } : { created_at: sortBy };
 
 	const skip = (page - 1) * limit;
 
@@ -185,13 +205,16 @@ const getMyServices = async (user: IUser, query: IServiceQuery) => {
 			where,
 			skip,
 			take: limit,
-			orderBy
+			orderBy,
 		}),
-		prisma.emergencyService.count()
+		prisma.emergencyService.count({ where }),
 	]);
 
-	if (!services) {
-		throw new AppError(404, "No service found.");
+	if (services.length === 0) {
+		return {
+			services: [],
+			meta: { total: 0, page, limit, totalPages: 0 },
+		};
 	}
 
 	return {
@@ -200,8 +223,8 @@ const getMyServices = async (user: IUser, query: IServiceQuery) => {
 			total,
 			page,
 			limit,
-			totalPages: Math.ceil(total / limit)
-		}
+			totalPages: Math.ceil(total / limit),
+		},
 	};
 };
 
@@ -265,11 +288,8 @@ const updateMyService = async (
 	if (buffer && services.service_image_public_id) {
 		try {
 			await cloudinary.uploader.destroy(services.service_image_public_id);
-		} catch (error) {
-			throw new AppError(
-				400,
-				`Failed to delete old profile image from Cloudinary: ${error}`,
-			);
+		} catch {
+			// Log but don't throw — old image orphan is non-critical
 		}
 	}
 
@@ -286,7 +306,7 @@ const deleteMyService = async (user: IUser, id: string) => {
 		throw new AppError(404, "No service found.");
 	}
 
-	if (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN') {
+	if (user.role !== "SUPER_ADMIN" && user.role !== "ADMIN") {
 		if (service.hospital.user_id !== user.userId) {
 			throw new AppError(403, "Unauthorized access.");
 		}
@@ -295,6 +315,86 @@ const deleteMyService = async (user: IUser, id: string) => {
 	await prisma.emergencyService.delete({ where: { id } });
 };
 
+// Admin Controlled
+const getAllServiceAdmin = async (query: IServiceQuery) => {
+	const {
+		search,
+		service_category,
+		service_status,
+		sortBy = "desc",
+		sortByPrice,
+		rawPage = 1,
+		rawLimit = 10,
+	} = query;
+
+	const page = Math.max(1, Number(rawPage));
+	const limit = Math.min(Math.max(1, Number(rawLimit)), 100);
+
+	const where: Record<string, unknown> = {};
+
+	if (search) {
+		where.OR = [{ service_name: { contains: search, mode: "insensitive" } }];
+	}
+
+	if (service_category) {
+		where.service_category = service_category;
+	}
+
+	if (service_status) {
+		where.service_status = service_status
+	}
+
+	const skip = (page - 1) * limit;
+
+	const orderBy = sortByPrice ? { price: sortByPrice } : { created_at: sortBy };
+
+	const [services, total] = await Promise.all([
+		prisma.emergencyService.findMany({
+			where,
+			skip,
+			take: limit,
+			orderBy,
+		}),
+		prisma.emergencyService.count({ where }),
+	]);
+
+	if (services.length === 0) {
+		return {
+			services: [],
+			meta: { total: 0, page, limit, totalPages: 0 },
+		};
+	}
+
+	return {
+		services,
+		meta: {
+			total,
+			page,
+			limit,
+			totalPages: Math.ceil(total / limit),
+		},
+	};
+};
+
+const updateServiceStatus = async (id: string, payload: IUpdateServiceStatus) => {
+	const service = await prisma.emergencyService.findUnique({
+		where: { id }
+	})
+
+	if (!service) {
+		throw new AppError(400, "No service found.")
+	}
+
+	const updateServiceStatus = await prisma.emergencyService.update({
+		where: { id },
+		data: {
+			service_status: payload.service_status
+		}
+	})
+
+	return updateServiceStatus
+}
+
 export const EmergencyService = {
 	createService,
 	getAllService,
@@ -302,4 +402,6 @@ export const EmergencyService = {
 	getMyServices,
 	updateMyService,
 	deleteMyService,
+	getAllServiceAdmin,
+	updateServiceStatus
 };

@@ -53,7 +53,8 @@ export const auth = (...requiredRoles: Role[]) => {
 			}
 
 			if (!user.is_active || user.is_blocked) {
-				throw new Error(
+				throw new AppError(
+					403,
 					"Your account has been blocked or not active. Please contact support.",
 				);
 			}

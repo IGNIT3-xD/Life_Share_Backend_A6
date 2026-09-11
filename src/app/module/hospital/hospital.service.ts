@@ -19,7 +19,7 @@ const createHospitalProfileService = async (
 	});
 
 	if (isExist) {
-		throw new AppError(400, "Hospital profile is alrady exist.");
+		throw new AppError(400, "Hospital profile is already exist.");
 	}
 
 	const createProfile = await prisma.hospital.create({
@@ -112,12 +112,20 @@ const updateHospitalProfileService = async (
 
 // Admin controlled
 const getAllHospitalProfile = async (query: IHospitalQuery) => {
-	const { hospital_status, sortBy = "desc", limit = 10, page = 1 } = query
+	const {
+		hospital_status,
+		sortBy = "desc",
+		rawLimit = 10,
+		rawPage = 1,
+	} = query;
 
-	const where: Record<string, unknown> = {}
+	const page = Math.max(1, Number(rawPage));
+	const limit = Math.min(Math.max(1, Number(rawLimit)), 100);
+
+	const where: Record<string, unknown> = {};
 
 	if (hospital_status) {
-		where.hospital_status = hospital_status
+		where.hospital_status = hospital_status;
 	}
 
 	const skip = (page - 1) * limit;
@@ -135,16 +143,16 @@ const getAllHospitalProfile = async (query: IHospitalQuery) => {
 						email: true,
 						address: true,
 						phone: true,
-						profile_pic: true
-					}
-				}
-			}
+						profile_pic: true,
+					},
+				},
+			},
 		}),
-		prisma.hospital.count()
-	])
+		prisma.hospital.count({ where }),
+	]);
 
 	if (!hospital) {
-		throw new AppError(404, "Hospital profile not found")
+		throw new AppError(404, "Hospital profile not found");
 	}
 
 	return {
@@ -154,8 +162,8 @@ const getAllHospitalProfile = async (query: IHospitalQuery) => {
 			page,
 			limit,
 			totalPages: Math.ceil(total / limit),
-		}
-	}
+		},
+	};
 };
 
 const getHospitalProfileDetails = async (id: string) => {
@@ -168,8 +176,8 @@ const getHospitalProfileDetails = async (id: string) => {
 					email: true,
 					address: true,
 					phone: true,
-					profile_pic: true
-				}
+					profile_pic: true,
+				},
 			},
 			emergencyServices: {
 				select: {
@@ -179,19 +187,22 @@ const getHospitalProfileDetails = async (id: string) => {
 					service_status: true,
 					availability: true,
 					service_image: true,
-				}
-			}
-		}
-	})
+				},
+			},
+		},
+	});
 
 	if (!hospital) {
-		throw new AppError(404, "Hospital profile not found")
+		throw new AppError(404, "Hospital profile not found");
 	}
 
-	return hospital
+	return hospital;
 };
 
-const updateHospitalProfileStatus = async (id: string, payload: IHospitalStatus) => {
+const updateHospitalProfileStatus = async (
+	id: string,
+	payload: IHospitalStatus,
+) => {
 	const isExist = await prisma.hospital.findUnique({
 		where: { id },
 	});
@@ -203,7 +214,7 @@ const updateHospitalProfileStatus = async (id: string, payload: IHospitalStatus)
 	const updateProfile = await prisma.hospital.update({
 		where: { id },
 		data: {
-			hospital_status: payload.hospital_status
+			hospital_status: payload.hospital_status,
 		},
 		include: {
 			user: {
@@ -231,9 +242,9 @@ const deleteHospitalProfile = async (user: IUser, id: string) => {
 
 	const userData = await validateUserById(user.userId);
 
-	if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+	if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
 		if (isExist.user_id !== userData.id) {
-			throw new AppError(403, "Unauthorized access.")
+			throw new AppError(403, "Unauthorized access.");
 		}
 	}
 
@@ -249,5 +260,5 @@ export const HospitalService = {
 	getAllHospitalProfile,
 	getHospitalProfileDetails,
 	updateHospitalProfileStatus,
-	deleteHospitalProfile
+	deleteHospitalProfile,
 };

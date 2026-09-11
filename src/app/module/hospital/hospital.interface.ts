@@ -18,8 +18,8 @@ export interface IUpdateHospitalProfile {
 export interface IHospitalQuery {
 	hospital_status?: HospitalStatus;
 	sortBy?: SortOrder;
-	page?: number;
-	limit?: number;
+	rawPage?: number;
+	rawLimit?: number;
 }
 
 export interface IHospitalStatus {

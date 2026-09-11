@@ -52,6 +52,27 @@ const createDonorProfileService = async (payload: IDonor, user: IUser) => {
 	return donor;
 };
 
+const getMyDonorProfileService = async (user: IUser) => {
+	const userData = await validateUserById(user.userId)
+
+	const donorProfile = await prisma.donor.findUnique({
+		where: {
+			userId: userData.id,
+		},
+		include: {
+			user: {
+				omit: { password: true }
+			}
+		}
+	})
+
+	if (!donorProfile) {
+		throw new AppError(404, "Donor profile not found.")
+	}
+
+	return donorProfile
+}
+
 const getAllDonorsService = async (query: IDonorQuery) => {
 	const {
 		search,
@@ -59,9 +80,12 @@ const getAllDonorsService = async (query: IDonorQuery) => {
 		availability,
 		location,
 		sortBy = "desc",
-		page = 1,
-		limit = 10,
+		rawPage = 1,
+		rawLimit = 10,
 	} = query;
+
+	const page = Math.max(1, Number(rawPage));
+	const limit = Math.min(Math.max(1, Number(rawLimit)), 100);
 
 	const where: Record<string, unknown> = {
 		donorStatus: DonorStatus.VERIFIED,
@@ -113,27 +137,41 @@ const getAllDonorsService = async (query: IDonorQuery) => {
 	};
 };
 
-const getDonationRequestService = async (user: IUser, query: IDonationAdmin) => {
-	const { urgency, blood_group, donationStatus, sortBy = "desc", page = 1, limit = 10, } = query;
+const getDonationRequestService = async (
+	user: IUser,
+	query: IDonationAdmin,
+) => {
+	const {
+		urgency,
+		blood_group,
+		donationStatus,
+		sortBy = "desc",
+		rawPage = 1,
+		rawLimit = 10,
+	} = query;
+
+	const page = Math.max(1, Number(rawPage));
+	const limit = Math.min(Math.max(1, Number(rawLimit)), 100);
 
 	const where: Record<string, unknown> = {
 		donor: {
 			userId: user.userId,
-		}
-	}
+		},
+	};
 
 	if (donationStatus) {
-		where.donationStatus = donationStatus
+		where.donationStatus = donationStatus;
 	}
 
+	const requesterFilters: Record<string, unknown> = {};
 	if (urgency) {
-		where.requester = {
-			urgency: urgency,
-		};
+		requesterFilters.urgency = urgency;
 	}
-
 	if (blood_group) {
-		where.requester = { blood_group }
+		requesterFilters.blood_group = blood_group;
+	}
+	if (Object.keys(requesterFilters).length > 0) {
+		where.requester = requesterFilters;
 	}
 
 	const skip = (page - 1) * limit;
@@ -144,10 +182,10 @@ const getDonationRequestService = async (user: IUser, query: IDonationAdmin) => 
 			skip,
 			take: limit,
 			include: { requester: true },
-			orderBy: { created_at: sortBy }
+			orderBy: { created_at: sortBy },
 		}),
-		prisma.donation.count({ where })
-	])
+		prisma.donation.count({ where }),
+	]);
 
 	return {
 		donation,
@@ -156,7 +194,7 @@ const getDonationRequestService = async (user: IUser, query: IDonationAdmin) => 
 			page,
 			limit,
 			totalPages: Math.ceil(total / limit),
-		}
+		},
 	};
 };
 
@@ -166,7 +204,16 @@ const getDetailsDonationRequestService = async (
 ) => {
 	const donation = await prisma.donation.findUnique({
 		where: { id: donation_id },
-		include: { donor: true },
+		include: {
+			donor: true,
+			requester: {
+				include: {
+					user: {
+						omit: { password: true }
+					}
+				}
+			}
+		},
 	});
 
 	if (!donation) {
@@ -210,6 +257,10 @@ const updateDonationRequestService = async (
 		);
 	}
 
+	if (donation.donationStatus === 'COMPLETED') {
+		throw new AppError(400, "This request is already completed.")
+	}
+
 	const result = await prisma.$transaction(async (tx) => {
 		const updatedDonation = await tx.donation.update({
 			where: { id: donation.id },
@@ -245,7 +296,7 @@ const updateDonationRequestService = async (
 
 			await tx.donor.update({
 				where: {
-					email: user.email,
+					id: donation.donor_id,
 				},
 				data: {
 					totalDonations: { increment: 1 },
@@ -342,8 +393,8 @@ const getDonorRequestService = async (user: IUser) => {
 		},
 	});
 
-	if (!donations) {
-		throw new AppError(404, "No donation request found.");
+	if (donations.length === 0) {
+		return [];
 	}
 
 	return donations;
@@ -358,9 +409,12 @@ const adminGetAllDonorsService = async (query: IDonorQueryAdmin) => {
 		donorStatus,
 		location,
 		sortBy = "desc",
-		page = 1,
-		limit = 10,
+		rawPage = 1,
+		rawLimit = 10,
 	} = query;
+
+	const page = Math.max(1, Number(rawPage));
+	const limit = Math.min(Math.max(1, Number(rawLimit)), 100);
 
 	const where: Record<string, unknown> = {};
 
@@ -412,7 +466,7 @@ const adminGetAllDonorsService = async (query: IDonorQueryAdmin) => {
 			totalPages: Math.ceil(total / limit),
 		},
 	};
-}
+};
 
 const updateDonorProfileStatusService = async (
 	donor_id: string,
@@ -428,7 +482,7 @@ const updateDonorProfileStatusService = async (
 
 	const updateDonorProfile = await prisma.donor.update({
 		where: {
-			id: donor.id
+			id: donor.id,
 		},
 		data: {
 			donorStatus: payload.donorStatus,
@@ -447,19 +501,20 @@ const deleteDonorProfileService = async (user: IUser, id: string) => {
 		throw new AppError(404, "Donor profile not found.");
 	}
 
-	if (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN') {
+	if (user.role !== "SUPER_ADMIN" && user.role !== "ADMIN") {
 		if (donor.userId !== user.userId) {
-			throw new AppError(403, "Unauthorized access.")
+			throw new AppError(403, "Unauthorized access.");
 		}
 	}
 
 	await prisma.donor.delete({
-		where: { id }
+		where: { id },
 	});
 };
 
 export const DonorService = {
 	createDonorProfileService,
+	getMyDonorProfileService,
 	getAllDonorsService,
 	getDonationRequestService,
 	getDetailsDonationRequestService,
@@ -469,5 +524,5 @@ export const DonorService = {
 	getDonorRequestService,
 	updateDonorProfileStatusService,
 	adminGetAllDonorsService,
-	deleteDonorProfileService
+	deleteDonorProfileService,
 };

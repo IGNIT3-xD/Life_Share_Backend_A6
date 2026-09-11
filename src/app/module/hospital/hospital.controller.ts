@@ -71,7 +71,9 @@ const getAllHospitalProfileController = catchAsync(
 
 const getHospitalProfileDetailsController = catchAsync(
 	async (req: Request, res: Response) => {
-		const result = await HospitalService.getHospitalProfileDetails(req.params.id as string);
+		const result = await HospitalService.getHospitalProfileDetails(
+			req.params.id as string,
+		);
 
 		sendResponse(res, {
 			success: true,
@@ -84,7 +86,10 @@ const getHospitalProfileDetailsController = catchAsync(
 
 const updateHospitalProfileStatusController = catchAsync(
 	async (req: Request, res: Response) => {
-		const result = await HospitalService.updateHospitalProfileStatus(req.params.id as string, req.body);
+		const result = await HospitalService.updateHospitalProfileStatus(
+			req.params.id as string,
+			req.body,
+		);
 
 		sendResponse(res, {
 			success: true,
@@ -97,13 +102,13 @@ const updateHospitalProfileStatusController = catchAsync(
 
 const deleteHospitalProfileController = catchAsync(
 	async (req: Request, res: Response) => {
-		const user = req.user as IUser
+		const user = req.user as IUser;
 		await HospitalService.deleteHospitalProfile(user, req.params.id as string);
 
 		sendResponse(res, {
 			success: true,
 			statusCode: 200,
-			message: "Hospital profile deleted updated successfully"
+			message: "Hospital profile deleted updated successfully",
 		});
 	},
 );
@@ -115,5 +120,5 @@ export const HospitalController = {
 	getAllHospitalProfileController,
 	getHospitalProfileDetailsController,
 	updateHospitalProfileStatusController,
-	deleteHospitalProfileController
+	deleteHospitalProfileController,
 };

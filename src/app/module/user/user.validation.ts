@@ -50,7 +50,7 @@ const updateMyRequestValidationSchema = z.object({
 	request_status: z
 		.enum(
 			[RequestStatus.PENDING, RequestStatus.CANCELLED],
-			"You can only Cancel or Pendin request status",
+			"You can only cancel or pending the request status.",
 		)
 		.optional(),
 });

@@ -23,15 +23,10 @@ userRouter.post(
 
 userRouter.get("/requester", UserController.getAllRequesterController);
 
-userRouter.get(
-	"/my-request",
-	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
-	UserController.getMyRequestController,
-);
+userRouter.get("/all-requesters", auth(Role.SUPER_ADMIN, Role.ADMIN), UserController.getAllRequesterAdminController);
 
 userRouter.get(
-	"/my-request/:id",
-	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
+	"/request/:id",
 	UserController.getMyRequestDetailsController,
 );
 
@@ -54,6 +49,12 @@ userRouter.patch(
 	upload.single("profile_pic"),
 	validateRequest(UserValidation.updateUserValidation),
 	UserController.updateProfileController,
+);
+
+userRouter.put(
+	"/requester/:id",
+	auth(Role.SUPER_ADMIN, Role.ADMIN),
+	UserController.updateRequesterController,
 );
 
 userRouter.get(

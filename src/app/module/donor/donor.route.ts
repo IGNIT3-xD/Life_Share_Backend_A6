@@ -14,32 +14,42 @@ donorRouter.post(
 	DonorController.createDonorProfileController,
 );
 
+donorRouter.get(
+	"/my-donor-profile",
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
+	DonorController.getMyDonorProfileController
+);
+
 donorRouter.get("/", DonorController.getAllDonorsController);
 
-donorRouter.get("/admin", auth(Role.SUPER_ADMIN, Role.ADMIN), DonorController.adminGetAllDonorsController);
+donorRouter.get(
+	"/admin",
+	auth(Role.SUPER_ADMIN, Role.ADMIN),
+	DonorController.adminGetAllDonorsController,
+);
 
 donorRouter.get(
 	"/donation-request",
-	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL),
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
 	DonorController.getDonationRequestController,
 );
 
 donorRouter.get(
 	"/donation-request/:id",
-	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL),
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
 	DonorController.getDetailsDonationRequestController,
 );
 
 donorRouter.patch(
 	"/donation-request/:id",
-	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL),
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
 	validateRequest(DonorValidtaion.updateDonationRequestValidate),
 	DonorController.updateDonationRequestController,
 );
 
 donorRouter.get(
 	"/donor-profile/:id",
-	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL),
+	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.DONOR, Role.HOSPITAL, Role.USER),
 	DonorController.getDonorProfileController,
 );
 

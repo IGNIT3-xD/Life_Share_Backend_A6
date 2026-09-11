@@ -4,6 +4,7 @@ import type {
 	RequestStatus,
 	RequestUrgency,
 	Role,
+	VerificationStatus,
 } from "../../../../prisma/generated/prisma/enums";
 import type { SortOrder } from "../donor/donor.interface";
 
@@ -51,8 +52,18 @@ export interface IRequesterQuery {
 	blood_group?: BloodGroup;
 	urgency?: RequestUrgency;
 	sortBy?: SortOrder;
-	page?: number;
-	limit?: number;
+	rawPage?: number;
+	rawLimit?: number;
+}
+
+export interface IRequesterQueryAdmin {
+	search?: string;
+	blood_group?: BloodGroup;
+	urgency?: RequestUrgency;
+	verificationStatus?: VerificationStatus;
+	sortBy?: SortOrder;
+	rawPage?: number;
+	rawLimit?: number;
 }
 
 export interface IUserQuery {
@@ -62,11 +73,15 @@ export interface IUserQuery {
 	is_active?: boolean;
 	is_blocked?: boolean;
 	sortBy?: SortOrder;
-	page?: number;
-	limit?: number;
+	rawPage?: number;
+	rawLimit?: number;
 }
 
 export interface IUpdateProfileStatus {
 	is_active?: boolean;
 	is_blocked?: boolean;
+}
+
+export interface IUpdateRequester {
+	verificationStatus: VerificationStatus
 }

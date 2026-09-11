@@ -19,6 +19,21 @@ const createDonorProfileController = catchAsync(
 	},
 );
 
+const getMyDonorProfileController = catchAsync(
+	async (req: Request, res: Response) => {
+		const user = req.user as IUser;
+
+		const result = await DonorService.getMyDonorProfileService(user);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "Donor profile retrieved successfully",
+			data: result,
+		});
+	},
+);
+
 const getAllDonorsController = catchAsync(
 	async (req: Request, res: Response) => {
 		const result = await DonorService.getAllDonorsService(req.query);
@@ -35,7 +50,10 @@ const getAllDonorsController = catchAsync(
 const getDonationRequestController = catchAsync(
 	async (req: Request, res: Response) => {
 		const user = req.user as IUser;
-		const result = await DonorService.getDonationRequestService(user, req.query);
+		const result = await DonorService.getDonationRequestService(
+			user,
+			req.query,
+		);
 
 		sendResponse(res, {
 			statusCode: 200,
@@ -148,7 +166,10 @@ const updateDonorProfileStatusController = catchAsync(
 	async (req: Request, res: Response) => {
 		const donor_id = req.params.id as string;
 
-		const result = await DonorService.updateDonorProfileStatusService(donor_id, req.body);
+		const result = await DonorService.updateDonorProfileStatusService(
+			donor_id,
+			req.body,
+		);
 
 		sendResponse(res, {
 			statusCode: 200,
@@ -162,7 +183,7 @@ const updateDonorProfileStatusController = catchAsync(
 const deleteDonorProfileController = catchAsync(
 	async (req: Request, res: Response) => {
 		const donor_id = req.params.id as string;
-		const user = req.user as IUser
+		const user = req.user as IUser;
 
 		await DonorService.deleteDonorProfileService(user, donor_id);
 
@@ -176,6 +197,7 @@ const deleteDonorProfileController = catchAsync(
 
 export const DonorController = {
 	createDonorProfileController,
+	getMyDonorProfileController,
 	getAllDonorsController,
 	getDonationRequestController,
 	getDetailsDonationRequestController,
@@ -185,5 +207,5 @@ export const DonorController = {
 	getDonorRequestController,
 	updateDonorProfileStatusController,
 	adminGetAllDonorsController,
-	deleteDonorProfileController
+	deleteDonorProfileController,
 };

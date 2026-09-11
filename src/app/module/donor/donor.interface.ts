@@ -14,8 +14,8 @@ export interface IDonorQuery {
 	availability?: DonorAvailability;
 	location?: string;
 	sortBy?: SortOrder;
-	page?: number;
-	limit?: number;
+	rawPage?: number;
+	rawLimit?: number;
 }
 
 export interface IDonorQueryAdmin {
@@ -25,8 +25,8 @@ export interface IDonorQueryAdmin {
 	donorStatus?: DonorStatus;
 	location?: string;
 	sortBy?: SortOrder;
-	page?: number;
-	limit?: number;
+	rawPage?: number;
+	rawLimit?: number;
 }
 
 export interface IDonationAdmin {
@@ -34,8 +34,8 @@ export interface IDonationAdmin {
 	donationStatus?: DonationStatus;
 	blood_group?: BloodGroup;
 	sortBy?: SortOrder;
-	page?: number;
-	limit?: number;
+	rawPage?: number;
+	rawLimit?: number;
 }
 
 export interface IDonor {

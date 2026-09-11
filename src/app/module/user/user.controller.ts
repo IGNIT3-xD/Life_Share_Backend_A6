@@ -45,30 +45,11 @@ const getAllRequesterController = catchAsync(
 	},
 );
 
-const getMyRequestController = catchAsync(
-	async (req: Request, res: Response) => {
-		const user = req.user as IUser;
-
-		const result = await UserService.getMyRequestService(user);
-
-		sendResponse(res, {
-			statusCode: 200,
-			success: true,
-			message: "All requests retrieved successfully",
-			data: result,
-		});
-	},
-);
-
 const getMyRequestDetailsController = catchAsync(
 	async (req: Request, res: Response) => {
-		const user = req.user as IUser;
 		const requster_id = req.params.id as string;
 
-		const result = await UserService.getMyRequestDetailsService(
-			user,
-			requster_id,
-		);
+		const result = await UserService.getMyRequestDetailsService(requster_id);
 
 		sendResponse(res, {
 			statusCode: 200,
@@ -136,22 +117,23 @@ const updateProfileController = catchAsync(
 	},
 );
 
-const getAllUserController = catchAsync(
-	async (req: Request, res: Response) => {
-		const result = await UserService.getAllUser(req.query);
+const getAllUserController = catchAsync(async (req: Request, res: Response) => {
+	const result = await UserService.getAllUser(req.query);
 
-		sendResponse(res, {
-			statusCode: 200,
-			success: true,
-			message: "Users retrieved successfully",
-			data: result,
-		});
-	},
-);
+	sendResponse(res, {
+		statusCode: 200,
+		success: true,
+		message: "Users retrieved successfully",
+		data: result,
+	});
+});
 
 const updateUserStatusController = catchAsync(
 	async (req: Request, res: Response) => {
-		const result = await UserService.updateUserStatus(req.params.id as string, req.body);
+		const result = await UserService.updateUserStatus(
+			req.params.id as string,
+			req.body,
+		);
 
 		sendResponse(res, {
 			statusCode: 200,
@@ -162,28 +144,52 @@ const updateUserStatusController = catchAsync(
 	},
 );
 
-const deleteUserController = catchAsync(
+const deleteUserController = catchAsync(async (req: Request, res: Response) => {
+	await UserService.deleteUser(req.params.id as string);
+
+	sendResponse(res, {
+		statusCode: 200,
+		success: true,
+		message: "User status deleted successfully",
+	});
+});
+
+const updateRequesterController = catchAsync(async (req: Request, res: Response) => {
+	const result = await UserService.updateRequester(req.params.id as string, req.body);
+
+	sendResponse(res, {
+		statusCode: 200,
+		success: true,
+		message: "Requester status updated successfully",
+		data: result
+	});
+});
+
+const getAllRequesterAdminController = catchAsync(
 	async (req: Request, res: Response) => {
-		await UserService.deleteUser(req.params.id as string);
+		const result = await UserService.getAllRequesterAdmin(req.query);
 
 		sendResponse(res, {
 			statusCode: 200,
 			success: true,
-			message: "User status updated successfully"
+			message: "All requesters retrieved successfully",
+			data: result,
 		});
 	},
 );
+
 
 export const UserController = {
 	getMeController,
 	makeBloodRequestController,
 	getAllRequesterController,
-	getMyRequestController,
 	getMyRequestDetailsController,
 	updateMyRequestController,
 	deleteMyRequestController,
 	updateProfileController,
 	getAllUserController,
 	updateUserStatusController,
-	deleteUserController
+	deleteUserController,
+	updateRequesterController,
+	getAllRequesterAdminController
 };

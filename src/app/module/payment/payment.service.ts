@@ -8,7 +8,7 @@ import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import { validateUserById } from "../../utils/isUserExist";
 import type { IUser } from "../user/user.interface";
-import type { IPaymentQuery } from "./payment.interface";
+import type { IPaymentQuery, IPaymentStatus } from "./payment.interface";
 
 const createPayemntService = async (user: IUser, booking_id: string) => {
 	const userData = await validateUserById(user.userId);
@@ -47,6 +47,12 @@ const createPayemntService = async (user: IUser, booking_id: string) => {
 			throw new AppError(
 				400,
 				"This service has already been paid successfully.",
+			);
+		}
+		if (existingPayment.payment_status === "REFUNDED") {
+			throw new AppError(
+				400,
+				"This payment has been refunded and cannot be modified.",
 			);
 		}
 	}
@@ -125,12 +131,16 @@ const createPaymentCallbackService = async (query: Record<string, unknown>) => {
 	const paymentId = query.paymentID;
 	const status = query.status;
 
-	if (!paymentId) {
-		throw new AppError(404, "Failed to get payment id.");
+	if (!paymentId || typeof paymentId !== "string") {
+		throw new AppError(400, "Invalid payment ID.");
 	}
 
-	if (!status) {
-		throw new AppError(404, "Failed to get payment status.");
+	if (!status || typeof status !== "string") {
+		throw new AppError(400, "Invalid payment status.");
+	}
+
+	if (!["success", "failure", "cancel"].includes(status)) {
+		throw new AppError(400, "Unexpected payment status value.");
 	}
 
 	const bkashIdToken = await getBkashIdToken();
@@ -272,45 +282,51 @@ const createPaymentCallbackService = async (query: Record<string, unknown>) => {
 };
 
 const getMyPayments = async (user: IUser, query: IPaymentQuery) => {
-	const { search, payment_status, payment_gateway, sortByAmount = 'desc', sortBy = 'desc', limit = 10, page = 1 } = query
+	const {
+		search,
+		payment_status,
+		payment_gateway,
+		sortBy = "desc",
+		rawLimit = 10,
+		rawPage = 1,
+	} = query;
+
+	const limit = Math.min(Math.max(1, Number(rawLimit)), 100);
+	const page = Math.max(1, Number(rawPage));
 
 	const where: Record<string, unknown> = {
-		user_id: user.userId
-	}
+		user_id: user.userId,
+	};
 
 	if (search) {
 		where.OR = [
 			{ merchant_invoice_number: { contains: search, mode: "insensitive" } },
 			{ payer_reference: { contains: search, mode: "insensitive" } },
 			{ bkash_trx_id: { contains: search, mode: "insensitive" } },
-		]
+		];
 	}
 
 	if (payment_status) {
-		where.payment_status = payment_status
+		where.payment_status = payment_status;
 	}
 
 	if (payment_gateway) {
-		where.payment_gateway = payment_gateway
+		where.payment_gateway = payment_gateway;
 	}
 
-	const skip = (page - 1) * limit
+	const skip = (page - 1) * limit;
 
-	const orderBy = sortByAmount ? { payment_amount: sortByAmount } : { created_at: sortBy }
+	const orderBy = { created_at: sortBy };
 
 	const [payment, total] = await Promise.all([
 		prisma.payment.findMany({
 			where,
 			skip,
 			take: limit,
-			orderBy
+			orderBy,
 		}),
-		prisma.payment.count()
-	])
-
-	if (!payment) {
-		throw new AppError(404, "No payment found.")
-	}
+		prisma.payment.count({ where }),
+	]);
 
 	return {
 		payment,
@@ -318,49 +334,62 @@ const getMyPayments = async (user: IUser, query: IPaymentQuery) => {
 			total,
 			page,
 			limit,
-			totalPages: Math.ceil(total / limit)
-		}
-	}
-}
+			totalPages: Math.ceil(total / limit),
+		},
+	};
+};
 
 // Admin Controlled
 const getAllPayments = async (query: IPaymentQuery) => {
-	const { search, payment_status, payment_gateway, sortByAmount = 'desc', sortBy = 'desc', limit = 10, page = 1 } = query
+	const {
+		search,
+		payment_status,
+		payment_gateway,
+		sortBy = "desc",
+		rawLimit = 10,
+		rawPage = 1,
+	} = query;
 
-	const where: Record<string, unknown> = {}
+	const limit = Math.min(Math.max(1, Number(rawLimit)), 100);
+	const page = Math.max(1, Number(rawPage));
+
+	const where: Record<string, unknown> = {};
 
 	if (search) {
 		where.OR = [
 			{ merchant_invoice_number: { contains: search, mode: "insensitive" } },
 			{ payer_reference: { contains: search, mode: "insensitive" } },
 			{ bkash_trx_id: { contains: search, mode: "insensitive" } },
-		]
+		];
 	}
 
 	if (payment_status) {
-		where.payment_status = payment_status
+		where.payment_status = payment_status;
 	}
 
 	if (payment_gateway) {
-		where.payment_gateway = payment_gateway
+		where.payment_gateway = payment_gateway;
 	}
 
-	const skip = (page - 1) * limit
+	const skip = (page - 1) * limit;
 
-	const orderBy = sortByAmount ? { payment_amount: sortByAmount } : { created_at: sortBy }
+	const orderBy = { created_at: sortBy };
 
 	const [payment, total] = await Promise.all([
 		prisma.payment.findMany({
 			where,
 			skip,
 			take: limit,
-			orderBy
+			orderBy,
 		}),
-		prisma.payment.count()
-	])
+		prisma.payment.count({ where }),
+	]);
 
-	if (!payment) {
-		throw new AppError(404, "No payment found.")
+	if (payment.length === 0) {
+		return {
+			payment: [],
+			meta: { total: 0, page, limit, totalPages: 0 },
+		};
 	}
 
 	return {
@@ -369,10 +398,10 @@ const getAllPayments = async (query: IPaymentQuery) => {
 			total,
 			page,
 			limit,
-			totalPages: Math.ceil(total / limit)
-		}
-	}
-}
+			totalPages: Math.ceil(total / limit),
+		},
+	};
+};
 
 const getPaymentDetails = async (id: string, user: IUser) => {
 	const payment = await prisma.payment.findUnique({
@@ -381,30 +410,174 @@ const getPaymentDetails = async (id: string, user: IUser) => {
 			emergencyService: true,
 			user: {
 				omit: {
-					password: true
+					password: true,
+				},
+			},
+		},
+	});
+
+	if (!payment) {
+		throw new AppError(404, "No payment found.");
+	}
+
+	if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
+		if (payment.user_id !== user.userId) {
+			throw new AppError(403, "Unauthorize access.");
+		}
+	}
+
+	return payment;
+};
+
+// Hospital Controlled 
+const getAllPaymentsHospital = async (query: IPaymentQuery, user: IUser) => {
+	const {
+		search,
+		payment_status,
+		payment_gateway,
+		sortBy = "desc",
+		rawLimit = 10,
+		rawPage = 1,
+	} = query;
+
+	const limit = Math.min(Math.max(1, Number(rawLimit)), 100);
+	const page = Math.max(1, Number(rawPage));
+
+	const where: Record<string, unknown> = {
+		emergencyService: {
+			hospital: {
+				user_id: user.userId
+			}
+		}
+	};
+
+	if (search) {
+		where.OR = [
+			{ merchant_invoice_number: { contains: search, mode: "insensitive" } },
+			{ payer_reference: { contains: search, mode: "insensitive" } },
+			{ bkash_trx_id: { contains: search, mode: "insensitive" } },
+		];
+	}
+
+	if (payment_status) {
+		where.payment_status = payment_status;
+	}
+
+	if (payment_gateway) {
+		where.payment_gateway = payment_gateway;
+	}
+
+	const skip = (page - 1) * limit;
+
+	const orderBy = { created_at: sortBy };
+
+	const [payment, total] = await Promise.all([
+		prisma.payment.findMany({
+			where,
+			skip,
+			take: limit,
+			orderBy,
+		}),
+		prisma.payment.count({ where }),
+	]);
+
+	if (payment.length === 0) {
+		return {
+			payment: [],
+			meta: { total: 0, page, limit, totalPages: 0 },
+		};
+	}
+
+	return {
+		payment,
+		meta: {
+			total,
+			page,
+			limit,
+			totalPages: Math.ceil(total / limit),
+		},
+	};
+};
+
+const updatePaymentStatus = async (id: string, payload: IPaymentStatus) => {
+	const payment = await prisma.payment.findUnique({
+		where: { id },
+		include: {
+			emergencyService: {
+				include: {
+					bookingServices: true
 				}
 			}
 		}
-	})
+	});
 
 	if (!payment) {
-		throw new AppError(404, "No payment found.")
+		throw new AppError(404, "No payment found.");
 	}
 
-
-	if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
-		if (payment.user_id !== user.userId) {
-			throw new AppError(403, "Unauthorize access.")
+	const booking = await prisma.bookingService.findUnique({
+		where: {
+			id: payment.merchant_invoice_number as string
 		}
+	})
+
+	if (!booking) {
+		throw new AppError(404, "Booking not found.")
 	}
 
-	return payment
-}
+	if (booking.booking_status !== 'CANCELLED') {
+		throw new AppError(400, "You can't update payment status of booking which is not cancelled yet.")
+	}
+
+	const result = await prisma.$transaction(async (tx) => {
+		const updateStatus = await tx.payment.update({
+			where: {
+				id
+			},
+			data: {
+				payment_status: payload.payment_status
+			}
+		})
+
+		if (updateStatus.payment_status === 'REFUNDED') {
+			await tx.bookingService.update({
+				where: { id: booking.id },
+				data: {
+					payment_status: 'REFUNDED'
+				}
+			})
+		}
+
+		else if (updateStatus.payment_status === 'REFUNDED_PENDING') {
+			await tx.bookingService.update({
+				where: { id: booking.id },
+				data: {
+					payment_status: 'REFUNDED_PENDING'
+				}
+			})
+		}
+
+		else if (updateStatus.payment_status === 'CANCELLED') {
+			await tx.bookingService.update({
+				where: { id: booking.id },
+				data: {
+					payment_status: 'CANCELLED'
+				}
+			})
+		}
+
+		return updateStatus
+	})
+
+	return result;
+};
 
 export const PaymentService = {
 	createPayemntService,
 	createPaymentCallbackService,
 	getMyPayments,
 	getAllPayments,
-	getPaymentDetails
+	getPaymentDetails,
+	getAllPaymentsHospital,
+	updatePaymentStatus
 };

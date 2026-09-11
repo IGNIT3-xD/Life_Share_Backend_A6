@@ -35,13 +35,16 @@ export interface IUpdateBookingStatus {
 	booking_status: BookingStatus;
 }
 
+export interface IUpdatePaymentStatus {
+	payment_status: PaymentStatus;
+}
+
 export interface IBookingQuery {
 	search?: string;
 	booking_status?: BookingStatus;
 	payment_status?: PaymentStatus;
 	payment_via?: PaymentVia;
 	sortBy?: SortOrder;
-	sortByAmount?: SortOrder;
 	page?: number;
 	limit?: number;
 }

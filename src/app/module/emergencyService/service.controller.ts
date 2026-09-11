@@ -38,6 +38,19 @@ const getAllServiceController = catchAsync(
 	},
 );
 
+const getAllServiceAdminController = catchAsync(
+	async (req: Request, res: Response) => {
+		const result = await EmergencyService.getAllServiceAdmin(req.query);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "Emergency services retrieved successfully",
+			data: result,
+		});
+	},
+);
+
 const getServiceDetailsController = catchAsync(
 	async (req: Request, res: Response) => {
 		const result = await EmergencyService.getServiceDetails(
@@ -103,6 +116,21 @@ const deleteMyServicesController = catchAsync(
 	},
 );
 
+const updateServiceStatusController = catchAsync(
+	async (req: Request, res: Response) => {
+		const id = req.params.id as string;
+
+		const result = await EmergencyService.updateServiceStatus(id, req.body);
+
+		sendResponse(res, {
+			statusCode: 200,
+			success: true,
+			message: "Emergency service status updated successfully",
+			data: result
+		});
+	},
+);
+
 export const EmergencyServiceController = {
 	createServiceController,
 	getAllServiceController,
@@ -110,4 +138,6 @@ export const EmergencyServiceController = {
 	getMyServicesController,
 	updateMyServicesController,
 	deleteMyServicesController,
+	getAllServiceAdminController,
+	updateServiceStatusController
 };

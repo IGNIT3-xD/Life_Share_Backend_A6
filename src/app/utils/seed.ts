@@ -57,12 +57,15 @@ export const seedSuperAdmin = async () => {
 		console.log("Super Admin Has Been Created : ", createSuperAdmin);
 	} catch (error) {
 		console.log("Error Seeding Super Admin : ", error);
-
-		await prisma.user.delete({
-			where: {
-				email: config.SUPER_ADMIN_EMAIL,
-			},
-		});
+		try {
+			await prisma.user.delete({
+				where: {
+					email: config.SUPER_ADMIN_EMAIL,
+				},
+			});
+		} catch {
+			// User may not exist, ignore cleanup error
+		}
 	}
 };
 
@@ -105,12 +108,15 @@ export const seedTesterAdmin = async () => {
 		console.log("Tester Admin Has Been Created : ", createTesterAdmin);
 	} catch (error) {
 		console.log("Error Seeding Tester Admin : ", error);
-
-		await prisma.user.delete({
-			where: {
-				email: config.TESTER_ADMIN_EMAIL,
-			},
-		});
+		try {
+			await prisma.user.delete({
+				where: {
+					email: config.TESTER_ADMIN_EMAIL,
+				},
+			});
+		} catch {
+			// User may not exist, ignore cleanup error
+		}
 	}
 };
 
@@ -165,12 +171,15 @@ export const seedTesterDonor = async () => {
 		console.log("Tester Donor Has Been Created : ", createTesterDonor);
 	} catch (error) {
 		console.log("Error Seeding Tester Donor : ", error);
-
-		await prisma.user.delete({
-			where: {
-				email: config.TESTER_DONOR_EMAIL,
-			},
-		});
+		try {
+			await prisma.user.delete({
+				where: {
+					email: config.TESTER_DONOR_EMAIL,
+				},
+			});
+		} catch {
+			// User may not exist, ignore cleanup error
+		}
 	}
 };
 
@@ -221,12 +230,15 @@ export const seedTesterHospital = async () => {
 
 		console.log("Tester Admin Has Been Created : ", createTesterHospital);
 	} catch (error) {
-		console.log("Error Seeding Tester Donor : ", error);
-
-		await prisma.user.delete({
-			where: {
-				email: config.TESTER_HOSPITAL_EMAIL,
-			},
-		});
+		console.log("Error Seeding Tester Hospital : ", error);
+		try {
+			await prisma.user.delete({
+				where: {
+					email: config.TESTER_HOSPITAL_EMAIL,
+				},
+			});
+		} catch {
+			// User may not exist, ignore cleanup error
+		}
 	}
 };

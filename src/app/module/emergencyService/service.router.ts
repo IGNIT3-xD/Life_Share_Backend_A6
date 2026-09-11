@@ -18,6 +18,8 @@ serviceRouter.post(
 
 serviceRouter.get("/", EmergencyServiceController.getAllServiceController);
 
+serviceRouter.get("/admin", auth(Role.SUPER_ADMIN, Role.ADMIN), EmergencyServiceController.getAllServiceAdminController);
+
 serviceRouter.get(
 	"/my-services",
 	auth(Role.HOSPITAL),
@@ -35,6 +37,12 @@ serviceRouter.patch(
 	upload.single("service_image"),
 	validateRequest(ServiceValidation.updateServiceValidate),
 	EmergencyServiceController.updateMyServicesController,
+);
+
+serviceRouter.put(
+	"/update-service-status/:id",
+	auth(Role.ADMIN, Role.SUPER_ADMIN),
+	EmergencyServiceController.updateServiceStatusController,
 );
 
 serviceRouter.delete(

@@ -133,7 +133,10 @@ const getBookingRequestsController = catchAsync(
 	async (req: Request, res: Response) => {
 		const user = req.user as IUser;
 
-		const result = await BookingService.getBookingRequestsService(user);
+		const result = await BookingService.getBookingRequestsService(
+			user,
+			req.query,
+		);
 
 		sendResponse(res, {
 			statusCode: 200,
@@ -172,5 +175,5 @@ export const BookingController = {
 	deleteBookingController,
 	updateBookingStatusController,
 	getBookingRequestsController,
-	getBookingRequestsDetailsController,
+	getBookingRequestsDetailsController
 };

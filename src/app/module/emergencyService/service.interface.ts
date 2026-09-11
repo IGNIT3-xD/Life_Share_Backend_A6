@@ -1,5 +1,5 @@
-import type { ServiceCategory } from "../../../../prisma/generated/prisma/enums";
-import { SortOrder } from "../donor/donor.interface";
+import type { ServiceCategory, ServiceStatus } from "../../../../prisma/generated/prisma/enums";
+import type { SortOrder } from "../donor/donor.interface";
 
 export interface IService {
 	service_name: string;
@@ -21,9 +21,14 @@ export interface IUpdateService {
 
 export interface IServiceQuery {
 	search?: string;
+	service_status?: ServiceStatus;
 	service_category?: ServiceCategory;
 	sortBy?: SortOrder;
 	sortByPrice?: SortOrder;
-	page?: number;
-	limit?: number;
+	rawPage?: number;
+	rawLimit?: number;
+}
+
+export interface IUpdateServiceStatus {
+	service_status: ServiceStatus
 }

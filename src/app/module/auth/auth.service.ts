@@ -141,11 +141,11 @@ const verifyEmailService = async (payload: IVerifyRegisterOtp) => {
 	const redisOtp = await redisClient.get(otpKey);
 
 	if (!redisOtp) {
-		throw new AppError(404, "No OTP found");
+		throw new AppError(404, "No OTP found. Please request a new one.");
 	}
 
 	if (redisOtp !== otp) {
-		throw new AppError(404, "Invalid OTP !!!");
+		throw new AppError(400, "Invalid OTP.");
 	}
 
 	await redisClient.del([otpKey]);
@@ -256,8 +256,12 @@ const refreshTokenService = async (rToken: string) => {
 		where: { id: userId, email },
 	});
 
-	if (!user?.is_active || user.is_blocked) {
-		throw new Error("User is inactive / blocked or not found.");
+	if (!user) {
+		throw new AppError(404, "User not found.");
+	}
+
+	if (!user.is_active || user.is_blocked) {
+		throw new AppError(403, "User is inactive or blocked.");
 	}
 
 	const jwtPayload = {

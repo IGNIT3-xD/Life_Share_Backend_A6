@@ -1,4 +1,4 @@
-import { BookingStatus } from "../../../../prisma/generated/prisma/enums";
+import { BookingStatus, PaymentStatus } from "../../../../prisma/generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import { validateUserById } from "../../utils/isUserExist";
@@ -8,6 +8,7 @@ import type {
 	IBookingQuery,
 	IUpdateBooking,
 	IUpdateBookingStatus,
+	IUpdatePaymentStatus,
 } from "./booking.interface";
 
 const createBookingService = async (
@@ -33,6 +34,9 @@ const createBookingService = async (
 		where: {
 			emergencyService_id: service_id,
 			user_id: userData.id,
+			booking_status: {
+				notIn: [BookingStatus.CANCELLED, BookingStatus.FAILED],
+			},
 		},
 	});
 
@@ -118,22 +122,33 @@ const updateBookingService = async (
 };
 
 const getMyBookingsService = async (user: IUser, query: IBookingQuery) => {
-	const { booking_status, payment_status, payment_via, sortBy = "desc", sortByAmount = "desc", search, limit = 10, page = 1 } = query
+	const {
+		booking_status,
+		payment_status,
+		payment_via,
+		sortBy = "desc",
+		search,
+		limit: rawLimit = 10,
+		page: rawPage = 1,
+	} = query;
+
+	const limit = Math.min(Math.max(1, Number(rawLimit)), 100);
+	const page = Math.max(1, Number(rawPage));
 
 	const where: Record<string, unknown> = {
 		user_id: user.userId,
-	}
+	};
 
 	if (booking_status) {
-		where.booking_status = booking_status
+		where.booking_status = booking_status;
 	}
 
 	if (payment_status) {
-		where.payment_status = payment_status
+		where.payment_status = payment_status;
 	}
 
 	if (payment_via) {
-		where.payment_via = payment_via
+		where.payment_via = payment_via;
 	}
 
 	if (search) {
@@ -141,12 +156,10 @@ const getMyBookingsService = async (user: IUser, query: IBookingQuery) => {
 			{ patient_name: { contains: search, mode: "insensitive" } },
 			{ patient_number: { contains: search, mode: "insensitive" } },
 			{ emergency_location: { contains: search, mode: "insensitive" } },
-		]
+		];
 	}
 
-	const orderBy = sortByAmount
-		? { payment_amount: sortByAmount }
-		: { created_at: sortBy };
+	const orderBy = { created_at: sortBy };
 
 	const skip = (page - 1) * limit;
 
@@ -155,13 +168,16 @@ const getMyBookingsService = async (user: IUser, query: IBookingQuery) => {
 			where,
 			skip,
 			take: limit,
-			orderBy
+			orderBy,
 		}),
-		prisma.bookingService.count()
+		prisma.bookingService.count({ where }),
 	]);
 
-	if (!bookings) {
-		throw new AppError(404, "Booking not found.");
+	if (bookings.length === 0) {
+		return {
+			bookings: [],
+			meta: { total: 0, page, limit, totalPages: 0 },
+		};
 	}
 
 	return {
@@ -170,8 +186,8 @@ const getMyBookingsService = async (user: IUser, query: IBookingQuery) => {
 			total,
 			page,
 			limit,
-			totalPages: Math.ceil(total / limit)
-		}
+			totalPages: Math.ceil(total / limit),
+		},
 	};
 };
 
@@ -222,22 +238,46 @@ const cancelBookingService = async (user: IUser, booking_id: string) => {
 	}
 
 	if (booking.booking_status === BookingStatus.COMPLETED) {
-		throw new AppError(
-			400,
-			`You can't cancel booking rignt now. Booking Status: ${booking.booking_status.toLowerCase()}.`,
-		);
+		throw new AppError(400, `You can't cancel a completed booking.`);
 	}
 
-	const cancelBooking = await prisma.bookingService.update({
-		where: {
-			id: booking.id,
-		},
-		data: {
+	if (booking.booking_status === BookingStatus.CANCELLED) {
+		throw new AppError(400, `Booking is already cancelled.`);
+	}
+
+	const requiresRefund = booking.payment_status === 'PAID';
+
+	const result = await prisma.$transaction(async (tx) => {
+		const bookingUpdateData: any = {
 			booking_status: BookingStatus.CANCELLED,
-		},
+		};
+
+		if (requiresRefund) {
+			bookingUpdateData.payment_status = PaymentStatus.REFUNDED_PENDING;
+		}
+
+		const cancelBooking = await tx.bookingService.update({
+			where: {
+				id: booking.id,
+			},
+			data: bookingUpdateData,
+		});
+
+		if (requiresRefund) {
+			await tx.payment.update({
+				where: {
+					merchant_invoice_number: booking.id
+				},
+				data: {
+					payment_status: PaymentStatus.REFUNDED_PENDING
+				}
+			});
+		}
+
+		return cancelBooking;
 	});
 
-	return cancelBooking;
+	return result;
 };
 
 const deleteBookingService = async (user: IUser, booking_id: string) => {
@@ -256,10 +296,11 @@ const deleteBookingService = async (user: IUser, booking_id: string) => {
 	}
 
 	if (booking.booking_status === BookingStatus.COMPLETED) {
-		throw new AppError(
-			400,
-			`You can't delete booking rignt now. Booking Status: ${booking.booking_status.toLowerCase()}.`,
-		);
+		throw new AppError(400, `You can't delete a completed booking.`);
+	}
+
+	if (booking.booking_status === BookingStatus.CANCELLED) {
+		throw new AppError(400, `Booking is already cancelled.`);
 	}
 
 	await prisma.bookingService.delete({
@@ -288,7 +329,7 @@ const updateBookingStatusService = async (
 	});
 
 	if (!hospitalProfile) {
-		throw new AppError(404, "Hosptal profile not exist.");
+		throw new AppError(404, "Hospital profile not exist.");
 	}
 
 	if (booking.hospital_id !== hospitalProfile.id) {
@@ -307,36 +348,137 @@ const updateBookingStatusService = async (
 		throw new AppError(403, "Unauthorized access");
 	}
 
+	if (booking.booking_status === 'COMPLETED') {
+		throw new AppError(400, "Booking is already completed.")
+	}
+
 	const updateBookingStatus = await prisma.bookingService.update({
 		where: {
 			id: booking.id,
 		},
 		data: {
-			booking_status: payload.booking_status,
+			booking_status: payload.booking_status
 		},
 	});
 
 	return updateBookingStatus;
 };
 
-const getBookingRequestsService = async (user: IUser) => {
+const updatePaymentStatusService = async (
+	user: IUser,
+	booking_id: string,
+	payload: IUpdatePaymentStatus,
+) => {
+	const booking = await prisma.bookingService.findUnique({
+		where: { id: booking_id },
+	});
+
+	if (!booking) {
+		throw new AppError(404, "Booking not found.");
+	}
+
 	const hospitalProfile = await prisma.hospital.findUnique({
 		where: { user_id: user.userId },
 	});
 
 	if (!hospitalProfile) {
-		throw new AppError(404, "Hosptal profile not exist.");
+		throw new AppError(404, "Hospital profile not exist.");
 	}
 
-	const bookings = await prisma.bookingService.findMany({
+	if (booking.hospital_id !== hospitalProfile.id) {
+		throw new AppError(403, "Unauthorized access");
+	}
+
+	const service = await prisma.emergencyService.findFirst({
 		where: { hospital_id: hospitalProfile.id },
 	});
 
-	if (!bookings) {
-		throw new AppError(404, "Booking not found.");
+	if (!service) {
+		throw new AppError(404, "Emergency service not found.");
 	}
 
-	return bookings;
+	if (service.hospital_id !== hospitalProfile.id) {
+		throw new AppError(403, "Unauthorized access");
+	}
+
+	if (booking.booking_status === 'COMPLETED') {
+		throw new AppError(400, "Booking is already completed.")
+	}
+
+	if (booking.booking_status !== 'CANCELLED') {
+		throw new AppError(400, "You can't update payment status of booking which is not cancelled.")
+	}
+
+	const result = await prisma.$transaction(async (tx) => {
+		await tx.bookingService.update({
+			where: {
+				id: booking.id,
+			},
+			data: {
+				payment_status: payload.payment_status,
+			},
+		});
+
+		const payment = await tx.payment.update({
+			where: {
+				merchant_invoice_number: booking.id
+			},
+			data: {
+				payment_status: payload.payment_status
+			}
+		})
+
+		return payment
+	})
+
+	return result;
+};
+
+const getBookingRequestsService = async (
+	user: IUser,
+	query?: Record<string, unknown>,
+) => {
+	const hospitalProfile = await prisma.hospital.findUnique({
+		where: { user_id: user.userId },
+	});
+
+	if (!hospitalProfile) {
+		throw new AppError(404, "Hospital profile not found.");
+	}
+
+	const where: Record<string, unknown> = { hospital_id: hospitalProfile.id };
+
+	if (query?.booking_status) {
+		where.booking_status = query.booking_status
+	}
+
+	if (query?.payment_status) {
+		where.payment_status = query.payment_status
+	}
+
+	const page = Math.max(1, Number(query?.page) || 1);
+	const limit = Math.min(Math.max(1, Number(query?.limit) || 10), 100);
+	const skip = (page - 1) * limit;
+
+	const [bookings, total] = await Promise.all([
+		prisma.bookingService.findMany({
+			where,
+			skip,
+			take: limit,
+			orderBy: { created_at: "desc" },
+		}),
+		prisma.bookingService.count({ where }),
+	]);
+
+	return {
+		bookings,
+		meta: {
+			total,
+			page,
+			limit,
+			totalPages: Math.ceil(total / limit),
+		},
+	};
 };
 
 const getBookingRequestsDetailsService = async (
@@ -384,4 +526,5 @@ export const BookingService = {
 	updateBookingStatusService,
 	getBookingRequestsService,
 	getBookingRequestsDetailsService,
+	updatePaymentStatusService
 };

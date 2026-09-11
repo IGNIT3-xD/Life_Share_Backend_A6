@@ -46,7 +46,7 @@ bookingRouter.delete(
 );
 
 bookingRouter.get(
-	"/booking-request/:id",
+	"/my-booking-details/:id",
 	auth(Role.SUPER_ADMIN, Role.ADMIN, Role.USER, Role.DONOR, Role.HOSPITAL),
 	BookingController.getMyBookingDetailsController,
 );

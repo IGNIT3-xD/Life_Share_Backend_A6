@@ -5,9 +5,11 @@ import { validateUserById } from "../../utils/isUserExist";
 import type {
 	IBloodRequester,
 	IRequesterQuery,
+	IRequesterQueryAdmin,
 	IRequestUpdate,
 	IUpdateProfile,
 	IUpdateProfileStatus,
+	IUpdateRequester,
 	IUser,
 	IUserQuery,
 } from "./user.interface";
@@ -62,11 +64,21 @@ const makeBloodRequestService = async (
 };
 
 const getAllRequestersService = async (query: IRequesterQuery) => {
-	const { search, blood_group, urgency, sortBy = "desc", page = 1, limit = 10 } = query
+	const {
+		search,
+		blood_group,
+		urgency,
+		sortBy = "desc",
+		rawPage = 1,
+		rawLimit = 10,
+	} = query;
+
+	const page = Math.max(1, Number(rawPage));
+	const limit = Math.min(Math.max(1, Number(rawLimit)), 100);
 
 	const where: Record<string, unknown> = {
 		verificationStatus: "VERIFIED",
-	}
+	};
 
 	if (search) {
 		where.OR = [
@@ -76,24 +88,24 @@ const getAllRequestersService = async (query: IRequesterQuery) => {
 	}
 
 	if (blood_group) {
-		where.blood_group = blood_group
+		where.blood_group = blood_group;
 	}
 
 	if (urgency) {
-		where.urgency = urgency
+		where.urgency = urgency;
 	}
 
-	const skip = (page - 1) * limit
+	const skip = (page - 1) * limit;
 
 	const [requester, total] = await Promise.all([
 		prisma.requester.findMany({
 			where,
 			skip,
 			take: limit,
-			orderBy: { created_at: sortBy }
+			orderBy: { created_at: sortBy },
 		}),
-		prisma.requester.count({ where })
-	])
+		prisma.requester.count({ where }),
+	]);
 
 	return {
 		requester,
@@ -101,44 +113,25 @@ const getAllRequestersService = async (query: IRequesterQuery) => {
 			total,
 			page,
 			limit,
-			totalPages: Math.ceil(total / limit)
-		}
+			totalPages: Math.ceil(total / limit),
+		},
 	};
 };
 
-const getMyRequestService = async (user: IUser) => {
-	const request = await prisma.requester.findMany({
-		where: {
-			user_id: user.userId,
-		},
-	});
-
-	if (!request) {
-		throw new AppError(404, "No request record found.");
-	}
-
-	return request;
-};
-
-const getMyRequestDetailsService = async (user: IUser, request_id: string) => {
+const getMyRequestDetailsService = async (request_id: string) => {
 	const requestData = await prisma.requester.findUnique({
 		where: {
 			id: request_id,
 		},
 		include: {
-			donations: true,
+			user: {
+				omit: { password: true }
+			}
 		},
 	});
 
 	if (!requestData) {
 		throw new AppError(404, "No request record found.");
-	}
-
-	if (requestData.user_id !== user.userId) {
-		throw new AppError(
-			403,
-			"Unauthorized access. You do not own this request record.",
-		);
 	}
 
 	return requestData;
@@ -162,6 +155,23 @@ const updateMyRequestService = async (
 			403,
 			"Unauthorized access. You do not own this request record.",
 		);
+	}
+
+	const validStatusTransitions: Record<string, string[]> = {
+		PENDING: ["PENDING", "CANCELLED"],
+		IN_PROGRESS: ["IN_PROGRESS", "COMPLETED", "CANCELLED"],
+		COMPLETED: [],
+		CANCELLED: ["PENDING"],
+	};
+
+	if (payload.request_status) {
+		const allowed = validStatusTransitions[requestData.request_status] || [];
+		if (!allowed.includes(payload.request_status)) {
+			throw new AppError(
+				400,
+				`Cannot change request status from ${requestData.request_status} to ${payload.request_status}.`,
+			);
+		}
 	}
 
 	const updateRequesterDetails = await prisma.requester.update({
@@ -190,7 +200,7 @@ const deleteMyRequestService = async (user: IUser, request_id: string) => {
 		throw new AppError(404, "No request record found.");
 	}
 
-	if (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN') {
+	if (user.role !== "SUPER_ADMIN" && user.role !== "ADMIN") {
 		if (requestData.user_id !== user.userId) {
 			throw new AppError(
 				403,
@@ -266,11 +276,8 @@ const updateProfileService = async (
 	if (buffer && userData.profile_pic_public_id) {
 		try {
 			await cloudinary.uploader.destroy(userData.profile_pic_public_id);
-		} catch (error) {
-			throw new AppError(
-				400,
-				`Failed to delete old profile image from Cloudinary: ${error}`,
-			);
+		} catch {
+			// Log but don't throw — old image orphan is non-critical
 		}
 	}
 
@@ -279,9 +286,21 @@ const updateProfileService = async (
 
 // Admin Controlled
 const getAllUser = async (query: IUserQuery) => {
-	const { search, gender, is_active, is_blocked, limit = 10, page = 1, role, sortBy = 'desc' } = query
+	const {
+		search,
+		gender,
+		is_active,
+		is_blocked,
+		rawLimit = 10,
+		rawPage = 1,
+		role,
+		sortBy = "desc",
+	} = query;
 
-	const where: Record<string, unknown> = {}
+	const page = Math.max(1, Number(rawPage));
+	const limit = Math.min(Math.max(1, Number(rawLimit)), 100);
+
+	const where: Record<string, unknown> = {};
 
 	if (search) {
 		where.OR = [
@@ -289,36 +308,36 @@ const getAllUser = async (query: IUserQuery) => {
 			{ email: { contains: search, mode: "insensitive" } },
 			{ address: { contains: search, mode: "insensitive" } },
 			{ phone: { contains: search, mode: "insensitive" } },
-		]
+		];
 	}
 
 	if (gender) {
-		where.gender = gender
+		where.gender = gender;
 	}
 
 	if (is_active !== undefined) {
-		where.is_active = is_active === true
+		where.is_active = is_active === true;
 	}
 
 	if (is_blocked !== undefined) {
-		where.is_blocked = is_blocked === true
+		where.is_blocked = is_blocked === true;
 	}
 
 	if (role) {
-		where.role = role
+		where.role = role;
 	}
 
-	const skip = (page - 1) * limit
+	const skip = (page - 1) * limit;
 
 	const [user, total] = await Promise.all([
 		prisma.user.findMany({
 			where,
 			take: limit,
 			skip,
-			orderBy: { created_at: sortBy }
+			orderBy: { created_at: sortBy },
 		}),
-		prisma.user.count({ where })
-	])
+		prisma.user.count({ where }),
+	]);
 
 	return {
 		user,
@@ -326,51 +345,127 @@ const getAllUser = async (query: IUserQuery) => {
 			total,
 			page,
 			limit,
-			totalPages: Math.ceil(total / limit)
-		}
-	}
+			totalPages: Math.ceil(total / limit),
+		},
+	};
 };
 
 const updateUserStatus = async (id: string, payload: IUpdateProfileStatus) => {
-	const user = await prisma.user.findUnique({ where: { id } })
+	const user = await prisma.user.findUnique({ where: { id } });
 
 	if (!user) {
-		throw new AppError(404, "User not found.")
+		throw new AppError(404, "User not found.");
 	}
 
 	const updateUser = await prisma.user.update({
 		where: { id },
 		data: {
 			is_active: payload.is_active,
-			is_blocked: payload.is_blocked
-		}
-	})
+			is_blocked: payload.is_blocked,
+		},
+	});
 
-	return updateUser
+	return updateUser;
 };
 
 const deleteUser = async (id: string) => {
-	const user = await prisma.user.findUnique({ where: { id } })
+	const user = await prisma.user.findUnique({ where: { id } });
 
 	if (!user) {
-		throw new AppError(404, "User not found.")
+		throw new AppError(404, "User not found.");
 	}
 
 	await prisma.user.delete({
 		where: { id },
+	});
+};
+
+const updateRequester = async (id: string, payload: IUpdateRequester) => {
+	const requester = await prisma.requester.findUnique({ where: { id } })
+
+	if (!requester) {
+		throw new AppError(404, "No requester found.")
+	}
+
+	const verifyRequester = await prisma.requester.update({
+		where: { id },
+		data: {
+			verificationStatus: payload.verificationStatus
+		}
 	})
+
+	return verifyRequester
+};
+
+const getAllRequesterAdmin = async (query: IRequesterQueryAdmin) => {
+	const {
+		search,
+		blood_group,
+		urgency,
+		verificationStatus,
+		sortBy = "desc",
+		rawPage = 1,
+		rawLimit = 10,
+	} = query;
+
+	const page = Math.max(1, Number(rawPage));
+	const limit = Math.min(Math.max(1, Number(rawLimit)), 100);
+
+	const where: Record<string, unknown> = {};
+
+	if (search) {
+		where.OR = [
+			{ patientName: { contains: search, mode: "insensitive" } },
+			{ exact_location: { contains: search, mode: "insensitive" } },
+		];
+	}
+
+	if (blood_group) {
+		where.blood_group = blood_group;
+	}
+
+	if (urgency) {
+		where.urgency = urgency;
+	}
+
+	if (verificationStatus) {
+		where.verificationStatus = verificationStatus;
+	}
+
+	const skip = (page - 1) * limit;
+
+	const [requester, total] = await Promise.all([
+		prisma.requester.findMany({
+			where,
+			skip,
+			take: limit,
+			orderBy: { created_at: sortBy },
+		}),
+		prisma.requester.count({ where }),
+	]);
+
+	return {
+		requester,
+		meta: {
+			total,
+			page,
+			limit,
+			totalPages: Math.ceil(total / limit),
+		},
+	};
 };
 
 export const UserService = {
 	getMeService,
 	makeBloodRequestService,
 	getAllRequestersService,
-	getMyRequestService,
 	getMyRequestDetailsService,
 	updateMyRequestService,
 	deleteMyRequestService,
 	updateProfileService,
 	getAllUser,
 	updateUserStatus,
-	deleteUser
+	deleteUser,
+	updateRequester,
+	getAllRequesterAdmin
 };
