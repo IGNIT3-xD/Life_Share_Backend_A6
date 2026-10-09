@@ -24,14 +24,14 @@ const verifyEmailController = catchAsync(
 
 		res.cookie("accessToken", accessToken, {
 			httpOnly: true,
-			sameSite: "lax",
-			secure: config.NODE_ENV !== "development",
+			sameSite: config.NODE_ENV === "development" ? 'lax' : 'none',
+			secure: config.NODE_ENV === "development" ? false : true,
 			maxAge: 1000 * 60 * 60 * 24,
 		});
 		res.cookie("refreshToken", refreshToken, {
 			httpOnly: true,
-			sameSite: "lax",
-			secure: config.NODE_ENV !== "development",
+			sameSite: config.NODE_ENV === "development" ? 'lax' : 'none',
+			secure: config.NODE_ENV === "development" ? false : true,
 			maxAge: 1000 * 60 * 60 * 24 * 7,
 		});
 
@@ -55,14 +55,14 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
 
 	res.cookie("accessToken", accessToken, {
 		httpOnly: true,
-		sameSite: "lax",
-		secure: config.NODE_ENV !== "development",
+		sameSite: config.NODE_ENV === "development" ? 'lax' : 'none',
+		secure: config.NODE_ENV === "development" ? false : true,
 		maxAge: 1000 * 60 * 60 * 24,
 	});
 	res.cookie("refreshToken", refreshToken, {
 		httpOnly: true,
-		sameSite: "lax",
-		secure: config.NODE_ENV !== "development",
+		sameSite: config.NODE_ENV === "development" ? 'lax' : 'none',
+		secure: config.NODE_ENV === "development" ? false : true,
 		maxAge: 1000 * 60 * 60 * 24 * 7,
 	});
 
@@ -91,14 +91,14 @@ const refreshTokenController = catchAsync(
 
 		res.cookie("accessToken", accessToken, {
 			httpOnly: true,
-			sameSite: "lax",
-			secure: config.NODE_ENV !== "development",
+			sameSite: config.NODE_ENV === "development" ? 'lax' : 'none',
+			secure: config.NODE_ENV === "development" ? false : true,
 			maxAge: 1000 * 60 * 60 * 24,
 		});
 		res.cookie("refreshToken", newRefreshToken, {
 			httpOnly: true,
-			sameSite: "lax",
-			secure: config.NODE_ENV !== "development",
+			sameSite: config.NODE_ENV === "development" ? 'lax' : 'none',
+			secure: config.NODE_ENV === "development" ? false : true,
 			maxAge: 1000 * 60 * 60 * 24 * 7,
 		});
 

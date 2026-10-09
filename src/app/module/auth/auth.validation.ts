@@ -11,7 +11,7 @@ const registerUserValidation = z
 		password: z
 			.string()
 			.min(6, "Password must be at least 6 characters long.")
-			.max(20, "Password is too long")
+			.max(50, "Password is too long")
 			.regex(/[a-z]/, "Password must contain at least 1 lower case letter.")
 			.regex(/[A-Z]/, "Password must contain at least 1 upper case letter.")
 			.regex(/[0-9]/, "Password must contain at least 1 number.")
@@ -58,7 +58,7 @@ const loginUserValidation = z.object({
 	password: z
 		.string()
 		.min(6, "Password must be at least 6 characters long.")
-		.max(20, "Password is too long")
+		.max(50, "Password is too long")
 		.regex(/[a-z]/, "Password must contain at least 1 lower case letter.")
 		.regex(/[A-Z]/, "Password must contain at least 1 upper case letter.")
 		.regex(/[0-9]/, "Password must contain at least 1 number.")
